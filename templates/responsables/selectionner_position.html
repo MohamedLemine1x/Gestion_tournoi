@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Sélectionner une position{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-plus"></i> 
+                        Ajouter {{ utilisateur.get_full_name|default:utilisateur.username }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Équipe :</strong> {{ equipe.nom }}<br>
+                        <strong>Nouveau membre :</strong> {{ utilisateur.get_full_name|default:utilisateur.username }}<br>
+                        <strong>Email :</strong> {{ utilisateur.email }}
+                    </div>
+                    
+                    <form method="post" action="{% url 'responsables:selectionner_position' equipe.id utilisateur.id %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Position dans l'équipe</label>
+                            <div id="position" class="position-choices d-flex flex-wrap gap-2">
+                                {% for value, label in positions_choices %}
+                                <input type="radio" class="btn-check" name="position" id="position-{{ value|slugify }}" value="{{ value }}" autocomplete="off" {% if forloop.first %}checked{% endif %}>
+                                <label class="btn btn-outline-primary" for="position-{{ value|slugify }}">{{ label }}</label>
+                                {% endfor %}
+                            </div>
+                            <div class="form-text mt-2">Choisissez la position de ce joueur dans votre équipe.</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'responsables:ajouter_membre' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Ajouter à l'équipe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

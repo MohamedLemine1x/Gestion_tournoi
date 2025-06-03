@@ -1,0 +1,1140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion de l'équipe{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Variables CSS */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --purple-color: #6f42c1;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-500: #6c757d;
+    --gray-700: #495057;
+    --gray-900: #212529;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+    
+    /* Couleurs de fond pour les badges */
+    --primary-light: rgba(0, 123, 255, 0.1);
+    --success-light: rgba(40, 167, 69, 0.1);
+    --warning-light: rgba(255, 193, 7, 0.1);
+    --danger-light: rgba(220, 53, 69, 0.1);
+    --info-light: rgba(23, 162, 184, 0.1);
+    --purple-light: rgba(111, 66, 193, 0.1);
+    --secondary-light: rgba(108, 117, 125, 0.1);
+}
+
+/* Layout principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+/* Header de page */
+.page-header {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.page-title-group {
+    flex-grow: 1;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-icon {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    color: white;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.page-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Animation pour les icônes pulse */
+.pulse-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.page-subtitle {
+    color: var(--gray-500);
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: var(--gray-100);
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-body {
+    padding: 30px 25px;
+}
+
+/* Messages d'alerte */
+.alert {
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-success {
+    background: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+/* Boutons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s ease;
+    z-index: -1;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+    color: white;
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    color: white;
+}
+
+.btn-outline-primary {
+    background: white;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-outline-danger {
+    background: white;
+    color: var(--danger-color);
+    border: 2px solid var(--danger-color);
+}
+
+.btn-outline-danger:hover {
+    background: var(--danger-danger);
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--gray-500);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: var(--gray-700);
+    color: white;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+/* Formulaires */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 15px;
+    transition: var(--transition);
+    background: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-text {
+    font-size: 0.9em;
+    color: var(--gray-500);
+    margin-top: 5px;
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px; /* Adjusted from 0 */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    margin-top: 0; /* Ensure no extra margin */
+}
+
+.table th,
+.table td {
+    padding: 15px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: middle;
+}
+
+.table th {
+    background: var(--gray-100);
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+    background: var(--gray-100);
+}
+
+/* États vides */
+.empty-state {
+    text-align: center;
+    padding: 60px 30px;
+    color: var(--gray-500);
+    animation: fadeIn 0.5s ease;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    color: var(--gray-300);
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+.empty-state h3 {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: var(--gray-700);
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin-bottom: 30px;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-20px);}
+    60% {transform: translateY(-10px);}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* Avatar utilisateur (dans la liste des membres) */
+.member-card .user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.member-card .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.member-card .user-name {
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 1.1em;
+}
+
+.member-card .user-position {
+    color: var(--gray-500);
+    font-size: 0.95em;
+    margin-top: 2px;
+}
+
+/* Actions membres */
+.member-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.member-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.member-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #4F46E5, #7C3AED);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-color: rgba(0,123,255,0.2);
+}
+
+.member-card:hover::before {
+    opacity: 1;
+}
+
+.member-info {
+    flex: 1;
+    min-width: 0; /* Permet le text-overflow sur les enfants */
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.user-email {
+    font-size: 13px;
+    color: var(--gray-500);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px;
+}
+
+/* Badge de position */
+.position-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 50px;
+    width: fit-content;
+}
+
+/* Background colors pour les badges */
+.bg-primary-light {
+    background-color: var(--primary-light);
+}
+
+.bg-success-light {
+    background-color: var(--success-light);
+}
+
+.bg-warning-light {
+    background-color: var(--warning-light);
+}
+
+.bg-danger-light {
+    background-color: var(--danger-light);
+}
+
+.bg-info-light {
+    background-color: var(--info-light);
+}
+
+.bg-purple-light {
+    background-color: var(--purple-light);
+}
+
+.bg-secondary-light {
+    background-color: var(--secondary-light);
+}
+
+.text-purple {
+    color: var(--purple-color);
+}
+
+/* Boutons icon-only */
+.btn-icon {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-left: 6px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    transform: translateY(-3px);
+}
+
+/* Avatar redesigné */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.member-card:hover .user-avatar {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Actions des membres */
+.member-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
+    }
+
+    .page-header {
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+
+    .member-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn {
+        justify-content: center;
+        width: auto; /* Permet aux boutons de s'ajuster au contenu */
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+
+    .team-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .team-info .team-logo-container {
+        margin-bottom: 15px;
+    }
+
+    .team-info .team-details {
+        flex: unset;
+    }
+
+    .team-info .team-stats {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .member-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .member-card .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .member-card .user-avatar {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .member-card .member-actions {
+         width: 100%;
+    }
+    
+    .member-card .member-actions .btn {
+        width: 100%;
+    }
+
+    .page-actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .page-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Animations */
+.card {
+    animation: slideIn 0.4s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Actions de page */
+.page-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.page-actions .btn {
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.page-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+}
+
+/* Style carte membre simplifié comme dans l'image */
+.member-card-simple {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 16px;
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--gray-200);
+}
+
+.member-card-simple:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.member-card-simple .user-avatar {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.member-content {
+    flex: 1;
+    overflow: hidden;
+}
+
+.member-card-simple .user-name {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--gray-900);
+}
+
+.member-card-simple .position-label {
+    font-size: 13px;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 2px;
+}
+
+.member-card-simple .membre-email {
+    font-size: 12px;
+    color: var(--gray-500);
+    display: block;
+    margin-top: 2px;
+}
+
+.member-card-simple .member-actions {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.member-card-simple .btn {
+    font-size: 12px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.member-card-simple .btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Responsive pour les cartes de membre */
+@media (max-width: 768px) {
+    .member-card-simple {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+    }
+    
+    .member-content {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .member-card-simple .member-actions {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 12px;
+    }
+    
+    .member-card-simple .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .member-card-simple .user-avatar {
+        margin-bottom: 10px;
+    }
+}
+
+/* Ajout des couleurs pour les petits écrans */
+@media (max-width: 576px) {
+    .member-card-simple .btn span {
+        display: none;
+    }
+    
+    .member-card-simple .btn {
+        padding: 8px;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% include 'breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+    <!-- Header de page -->
+    <div class="page-header">
+        <div class="page-icon">
+            <i class="fas fa-users-cog"></i>
+        </div>
+        <div class="page-title-group">
+            <h1 class="page-title">Gestion de l'équipe</h1>
+            <p class="page-subtitle">Créez et gérez votre équipe de joueurs.</p>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line me-2"></i>
+                Tableau de Bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Messages d'alerte -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+             <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if not equipe %}
+        <!-- Création d'équipe -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-flag text-primary pulse-icon"></i>
+                    Créer votre équipe
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="create_team" value="1">
+
+                    <!-- Nom de l'équipe -->
+                    <div class="form-group">
+                        <label for="{{ form.nom.id_for_label }}" class="form-label">
+                            <i class="fas fa-signature text-primary me-1"></i>
+                            {{ form.nom.label }}
+                        </label>
+                         {{ form.nom }}
+                        {% if form.nom.errors %}
+                            <div class="text-danger mt-2">{{ form.nom.errors.0 }}</div>
+                        {% endif %}
+                         {% if form.nom.help_text %}
+                            <div class="form-text">{{ form.nom.help_text }}</div>
+                         {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            <i class="fas fa-comment-alt text-primary me-1"></i>
+                            {{ form.description.label }}
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-2">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                         {% if form.description.help_text %}
+                            <div class="form-text">{{ form.description.help_text }}</div>
+                         {% endif %}
+                    </div>
+
+                    <!-- Logo -->
+                    <div class="form-group">
+                        <label for="{{ form.logo.id_for_label }}" class="form-label">
+                            <i class="fas fa-camera text-primary me-1"></i>
+                            {{ form.logo.label }}
+                        </label>
+                        {{ form.logo }}
+                        {% if form.logo.errors %}
+                            <div class="text-danger mt-2">{{ form.logo.errors.0 }}</div>
+                        {% endif %}
+                         {% if form.logo.help_text %}
+                            <div class="form-text">{{ form.logo.help_text }}</div>
+                         {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between" style="margin-top: 30px;">
+                         <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Créer mon équipe
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Informations de l'équipe existante -->
+        <div class="card team-info-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    Informations de l'équipe
+                </h3>
+                <div>
+                    <a href="{% url 'equipes:modifier_equipe' equipe.id %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-pencil-alt me-1"></i>
+                        Modifier l'équipe
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="team-details-section" style="display: flex; align-items: center; gap: 25px; margin-bottom: 25px; flex-wrap: wrap;">
+                    <div class="team-logo-container" style="flex-shrink: 0;">
+                        {% if equipe.logo %}
+                            <img src="{{ equipe.logo.url }}" 
+                                 alt="Logo {{ equipe.nom }}" 
+                                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 3px solid var(--primary-color); box-shadow: 0 2px 8px rgba(0,123,255,0.1);">
+                        {% else %}
+                            <div style="width: 100px; height: 100px; background: var(--gray-200); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--gray-500); font-size: 3em; border: 3px solid var(--gray-300);">
+                                <i class="fas fa-football-ball"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="team-details" style="flex: 1;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 24px; color: var(--gray-900); font-weight: 700;">{{ equipe.nom }}</h4>
+                        <p style="margin: 0 0 15px 0; color: var(--gray-600); line-height: 1.6;">
+                            {{ equipe.description|default:"Aucune description disponible." }}
+                        </p>
+                        <div class="team-stats" style="display: flex; gap: 25px; font-size: 15px; color: var(--gray-500); flex-wrap: wrap;">
+                            <span><i class="fas fa-calendar-day text-success me-1"></i> Créée le {{ equipe.date_creation|date:"d/m/Y" }}</span>
+                            <span><i class="fas fa-crown text-warning me-1"></i> Responsable: {{ equipe.responsable.user.get_full_name|default:equipe.responsable.user.username }}</span>
+                            <span><i class="fas fa-users text-info me-1"></i> Membres: {{ membres.count }}/20</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="card stats-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-pie text-primary"></i>
+                    Statistiques rapides
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-primary-light">
+                                <i class="fas fa-users text-primary"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">{{ membres.count }}</div>
+                                <div class="stat-label">Membres</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-success-light">
+                                <i class="fas fa-futbol text-success"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">{{ membres|yesno:"Oui,Non" }}</div>
+                                <div class="stat-label">Prêt pour tournoi</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-warning-light">
+                                <i class="fas fa-calendar-alt text-warning"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">{{ equipe.date_creation|date:"d/m/Y" }}</div>
+                                <div class="stat-label">Date de création</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-info-light">
+                                <i class="fas fa-trophy text-info"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Tournois gagnés</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestion des membres -->
+        <div class="card members-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title">
+                    <i class="fas fa-user-friends text-primary"></i>
+                    Membres de l'équipe ({{ membres.count }}/20)
+                </h3>
+                 {% if equipe.peut_ajouter_membre %}
+                    <div>
+                         <a href="{% url 'responsables:ajouter_membre' %}" class="btn btn-success btn-sm">
+                              <i class="fas fa-user-plus me-1"></i>Ajouter un membre
+                         </a>
+                     </div>
+                 {% else %}
+                     <span class="badge bg-warning text-dark">
+                         <i class="fas fa-exclamation-triangle me-1"></i>
+                         Équipe complète (20/20)
+                     </span>
+                 {% endif %}
+            </div>
+            <div class="card-body">
+                {% if membres %}
+                    <div class="row">
+                        {% for membre in membres %}
+                            <div class="col-md-12">
+                                <div class="member-card-simple">
+                                    <div class="user-avatar" style="background: {% cycle '#4F46E5' '#16A34A' '#DC2626' '#EA580C' '#0284C7' '#7C3AED' %};">
+                                        {{ membre.utilisateur.username|slice:":1"|upper }}
+                                    </div>
+                                    <div class="member-content">
+                                        <div class="user-name">{{ membre.utilisateur.get_full_name|default:membre.utilisateur.username }}</div>
+                                        <div class="position-label">
+                                            {% if membre.position %}
+                                                <i class="fas {% if membre.position == 'Gardien' %}fa-hand-paper text-warning
+                                                    {% elif membre.position == 'Défenseur' %}fa-shield-alt text-danger
+                                                    {% elif membre.position == 'Milieu' %}fa-exchange-alt text-success
+                                                    {% elif membre.position == 'Attaquant' %}fa-futbol text-primary
+                                                    {% elif membre.position == 'Responsable' %}fa-crown text-warning
+                                                    {% else %}fa-user-tag text-secondary{% endif %}"></i>
+                                                {{ membre.position }}
+                                            {% else %}
+                                                <i class="fas fa-question-circle text-muted"></i>
+                                                Position non définie
+                                            {% endif %}
+                                        </div>
+                                        <span class="membre-email">
+                                            <i class="fas fa-envelope text-muted"></i> {{ membre.utilisateur.email }}
+                                        </span>
+                                    </div>
+                                    <div class="member-actions">
+                                        <a href="{% url 'equipes:detail_equipe' membre.equipe.id %}" class="btn btn-sm btn-outline-primary" title="Voir">
+                                            <i class="fas fa-eye"></i> <span>Voir</span>
+                                        </a>
+                                        <a href="{% url 'equipes:modifier_membre' membre.id %}" class="btn btn-sm btn-warning" title="Modifier">
+                                            <i class="fas fa-pencil-alt"></i> <span>Modifier</span>
+                                        </a>
+                                        <a href="{% url 'equipes:retirer_membre' membre.id %}" class="btn btn-sm btn-danger" title="Retirer">
+                                            <i class="fas fa-user-minus"></i> <span>Retirer</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-users-slash"></i>
+                        </div>
+                        <h3>Aucun membre dans l'équipe</h3>
+                        <p>Commencez par ajouter des membres à votre équipe pour pouvoir participer aux tournois.</p>
+                        {% if equipe.peut_ajouter_membre %}
+                            <a href="{% url 'responsables:ajouter_membre' %}" class="btn btn-success">
+                                <i class="fas fa-user-plus me-2"></i> Ajouter un membre
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    {% endif %}
+</div>
+{% endblock %}

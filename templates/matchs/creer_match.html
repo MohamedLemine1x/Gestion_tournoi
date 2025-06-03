@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Créer un nouveau match | TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .match-form-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .match-form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-text {
+        color: #6c757d;
+    }
+    
+    .team-selection {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+    
+    .team-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .team-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin-right: 15px;
+        object-fit: cover;
+        border: 2px solid #dee2e6;
+    }
+    
+    .team-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .team-role {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <!-- Titre et explication -->
+            <div class="mb-4 text-center">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-calendar-plus text-primary me-2"></i>
+                    Créer un nouveau match
+                </h1>
+                <p class="lead text-muted">
+                    Programmez un match amical pour votre équipe
+                </p>
+            </div>
+            
+            <!-- Formulaire de création de match -->
+            <div class="card match-form-card">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Affichage des messages d'erreurs et de succès -->
+                        {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}" role="alert">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Section Votre Équipe -->
+                        <div class="team-selection">
+                            <h3 class="h5 mb-3">Votre équipe</h3>
+                            <div class="team-info">
+                                {% if equipe_responsable.logo %}
+                                    <img src="{{ equipe_responsable.logo.url }}" alt="{{ equipe_responsable.nom }}" class="team-logo">
+                                {% else %}
+                                    <div class="team-logo d-flex justify-content-center align-items-center bg-light">
+                                        <i class="fas fa-users text-secondary"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <p class="team-name">{{ equipe_responsable.nom }}</p>
+                                    <span class="team-role">Votre équipe</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Options pour votre équipe -->
+                            <div class="mb-3 mt-4">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="equipe_position" id="domicile" value="domicile" checked>
+                                    <label class="form-check-label" for="domicile">
+                                        <i class="fas fa-home me-1"></i> Domicile
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="equipe_position" id="exterieur" value="exterieur">
+                                    <label class="form-check-label" for="exterieur">
+                                        <i class="fas fa-plane-departure me-1"></i> Extérieur
+                                    </label>
+                                </div>
+                                <input type="hidden" name="equipe_a" id="equipe_a" value="{{ equipe_responsable.id }}">
+                            </div>
+                        </div>
+                        
+                        <!-- Section Équipe Adverse -->
+                        <div class="mb-4">
+                            <label for="equipe_b" class="form-label">Équipe adverse</label>
+                            <select class="form-select" id="equipe_b" name="equipe_b" required>
+                                <option value="">Sélectionnez une équipe</option>
+                                {% for equipe in equipes_adverses %}
+                                <option value="{{ equipe.id }}">{{ equipe.nom }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Choisissez l'équipe contre laquelle vous souhaitez organiser un match</div>
+                        </div>
+                        
+                        <!-- Date et heure du match -->
+                        <div class="mb-4">
+                            <label for="date" class="form-label">Date et heure du match</label>
+                            <input type="datetime-local" class="form-control" id="date" name="date" value="{{ now }}" required>
+                            <div class="form-text">Sélectionnez la date et l'heure prévues pour le match</div>
+                        </div>
+                        
+                        <!-- Lieu du match -->
+                        <div class="mb-4">
+                            <label for="lieu" class="form-label">Lieu du match</label>
+                            <input type="text" class="form-control" id="lieu" name="lieu" placeholder="Nom du stade, adresse...">
+                            <div class="form-text">Précisez le lieu où se déroulera le match</div>
+                        </div>
+                        
+                        <!-- Boutons d'action -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Créer le match
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour gérer l'échange d'équipes selon la position -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const domicileRadio = document.getElementById('domicile');
+    const exterieurRadio = document.getElementById('exterieur');
+    const equipeAInput = document.getElementById('equipe_a');
+    
+    // Fonction qui met à jour l'équipe A selon la position choisie
+    function updateTeamPositions() {
+        if (exterieurRadio.checked) {
+            // Si "Extérieur" est coché, l'équipe adverse devient l'équipe A (domicile)
+            const equipeBSelect = document.getElementById('equipe_b');
+            if (equipeBSelect.value) {
+                const tempEquipeA = equipeAInput.value;
+                equipeAInput.value = equipeBSelect.value;
+                equipeBSelect.value = tempEquipeA;
+            }
+        } else {
+            // Si "Domicile" est coché, votre équipe est l'équipe A (domicile)
+            equipeAInput.value = '{{ equipe_responsable.id }}';
+        }
+    }
+    
+    // Écouteurs d'événements
+    domicileRadio.addEventListener('change', updateTeamPositions);
+    exterieurRadio.addEventListener('change', updateTeamPositions);
+    
+    // Initialisation
+    updateTeamPositions();
+});
+</script>
+{% endblock %} 

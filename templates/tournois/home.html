@@ -1,0 +1,1067 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}TournoiPRO - Gestion de Tournois de Football{% endblock %}
+
+{% block meta_description %}TournoiPRO est la plateforme de référence pour organiser et gérer vos tournois de football. Solution complète pour les organisateurs, équipes et participants.{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Hero Section */
+.hero-section {
+  position: relative;
+  background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+  padding: 100px 0 120px;
+  color: #fff;
+  overflow: hidden;
+  margin-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 80px 0 100px;
+    margin-bottom: 60px;
+  }
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a69bd' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  line-height: 1.2;
+  background: linear-gradient(to right, #fff, #74b9ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+.hero-img-container {
+  position: relative;
+  z-index: 2;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: all 0.5s ease;
+  margin-top: 30px;
+}
+
+@media (min-width: 992px) {
+  .hero-img-container {
+    margin-top: 0;
+  }
+}
+
+.hero-img-container:hover {
+  transform: perspective(1000px) rotateY(0);
+}
+
+.hero-img {
+  width: 100%;
+  height: auto;
+  transition: transform 0.5s ease;
+}
+
+.hero-img-container:hover .hero-img {
+  transform: scale(1.05);
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 576px) {
+  .hero-buttons {
+    gap: 10px;
+    margin-top: 30px;
+  }
+  
+  .hero-buttons .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+
+.btn-primary {
+  background-color: #4a69bd;
+  border: none;
+  padding: 12px 28px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+  z-index: -1;
+}
+
+.btn-primary:hover::after {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  background-color: #1e3799;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(26, 32, 44, 0.3);
+}
+
+.btn-outline-light {
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  background: transparent;
+  padding: 12px 28px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Stats Counter */
+.stats-counter {
+  margin-top: -60px;
+  margin-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  .stats-counter {
+    margin-top: -40px;
+    margin-bottom: 60px;
+  }
+}
+
+.stats-card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border-bottom: 4px solid #4a69bd;
+  margin-bottom: 20px;
+  height: 100%;
+}
+
+.stats-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.stats-icon {
+  font-size: 2.5rem;
+  color: #4a69bd;
+  margin-bottom: 15px;
+}
+
+@media (max-width: 576px) {
+  .stats-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+}
+
+.stats-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 5px;
+}
+
+@media (max-width: 576px) {
+  .stats-number {
+    font-size: 2rem;
+  }
+}
+
+.stats-label {
+  color: #718096;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Features Section */
+.features-section {
+  padding: 80px 0;
+  background-color: #f8fafc;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 20px;
+}
+
+.section-subtitle {
+  color: #718096;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 40px 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon-container {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ebf4ff;
+  border-radius: 50%;
+  margin: 0 auto 25px;
+}
+
+.feature-icon {
+  font-size: 2rem;
+  color: #4a69bd;
+}
+
+.feature-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 15px;
+}
+
+.feature-description {
+  color: #718096;
+  margin-bottom: 20px;
+}
+
+/* Tournaments Section */
+.tournaments-section {
+  padding: 80px 0;
+  background-color: #f8fafc;
+}
+
+.tournaments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.tournaments-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0;
+}
+
+.tournament-card {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.tournament-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.tournament-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.tournament-content {
+  padding: 25px;
+}
+
+.tournament-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 15px;
+}
+
+.tournament-info {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+.tournament-info li {
+  display: flex;
+  align-items: center;
+  color: #718096;
+  margin-bottom: 10px;
+}
+
+.tournament-info li i {
+  color: #4a69bd;
+  margin-right: 10px;
+  width: 16px;
+}
+
+.tournament-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid #edf2f7;
+}
+
+.tournament-teams {
+  display: flex;
+  align-items: center;
+}
+
+.tournament-teams-icon {
+  font-size: 1.2rem;
+  color: #4a69bd;
+  margin-right: 5px;
+}
+
+.tournament-teams-count {
+  font-weight: 600;
+  color: #455568;
+}
+
+/* CTA Section */
+.cta-section {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #4a69bd 0%, #1e3799 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.cta-content {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cta-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta-text {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  margin-bottom: 40px;
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-light {
+  background-color: #fff;
+  color: #4a69bd;
+  border: none;
+  padding: 12px 28px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-light:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Testimonials section */
+.testimonials-section {
+  padding: 80px 0;
+  background-color: #f8fafc;
+}
+
+.testimonial-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  position: relative;
+  margin-top: 0;
+  transition: all 0.3s ease;
+  height: 100%;
+  border-left: 4px solid #4a69bd;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial-content {
+  margin-top: 0;
+  color: #4a5568;
+  font-style: italic;
+  position: relative;
+  padding-left: 20px;
+}
+
+.testimonial-content::before {
+  content: """;
+  position: absolute;
+  top: -20px;
+  left: -10px;
+  font-size: 4rem;
+  color: #e2e8f0;
+  font-family: serif;
+  line-height: 1;
+}
+
+.testimonial-name {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 5px;
+  font-size: 1.125rem;
+}
+
+.testimonial-role {
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+/* Responsive styles */
+@media (max-width: 991.98px) {
+  .hero-section {
+    padding: 80px 0 120px;
+    text-align: center;
+  }
+  
+  .hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-buttons {
+    justify-content: center;
+  }
+  
+  .hero-img-container {
+    margin-top: 50px;
+    transform: none;
+  }
+  
+  .stats-counter {
+    margin-top: -40px;
+  }
+  
+  .stats-card {
+    margin-bottom: 20px;
+  }
+  
+  .tournaments-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+  }
+  
+  .feature-card,
+  .tournament-card,
+  .testimonial-card {
+    margin-bottom: 40px;
+  }
+}
+
+/* Tournament Section Styles */
+.tournaments-section {
+  padding: 80px 0;
+  background-color: #f8fafc;
+}
+
+.tournament-card {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tournament-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.tournament-image-container {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+}
+
+.tournament-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.tournament-card:hover .tournament-img {
+  transform: scale(1.05);
+}
+
+.tournament-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tournament-card:hover .tournament-overlay {
+  opacity: 1;
+}
+
+.tournament-status-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.tournament-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-primary-soft { background-color: rgba(74, 105, 189, 0.1); }
+.bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+.bg-success-soft { background-color: rgba(40, 167, 69, 0.1); }
+
+.empty-state {
+  border-radius: 12px;
+}
+
+.empty-state-icon {
+  color: #e9ecef;
+}
+
+/* Countdown styles */
+.tournament-countdown {
+  font-weight: 500;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <h1 class="hero-title">Gérez vos tournois de football comme jamais</h1>
+          <p class="hero-subtitle">Une solution complète et intuitive pour organiser, gérer et suivre vos compétitions sportives en toute simplicité</p>
+          <div class="hero-buttons">
+            <a href="{% url 'tournois:liste' %}" class="btn btn-primary">
+              <i class="fas fa-trophy me-2"></i> Découvrir les tournois
+            </a>
+            <a href="{% url 'accounts:register' %}" class="btn btn-outline-light">
+              <i class="fas fa-user-plus me-2"></i> Créer un compte
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-img-container">
+          <img src="{% static 'tournoi/img/field-aerial.jpg' %}" alt="Terrain de football" class="hero-img img-fluid">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Counter -->
+<div class="stats-counter">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <h3 class="stats-number">250+</h3>
+          <p class="stats-label">Tournois organisés</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3 class="stats-number">5,000+</h3>
+          <p class="stats-label">Équipes participantes</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-futbol"></i>
+          </div>
+          <h3 class="stats-number">12,500+</h3>
+          <p class="stats-label">Matchs disputés</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features Section -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Fonctionnalités principales</h2>
+      <p class="section-subtitle">Découvrez nos outils qui facilitent la gestion et l'organisation de vos tournois de football</p>
+    </div>
+    
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <i class="fas fa-sitemap feature-icon"></i>
+          </div>
+          <h3 class="feature-title">Organisation intuitive</h3>
+          <p class="feature-description">Créez des tournois à élimination directe ou en phases de groupes avec une interface simple et intuitive.</p>
+          <a href="#" class="btn btn-sm btn-outline-primary">En savoir plus</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <i class="fas fa-users feature-icon"></i>
+          </div>
+          <h3 class="feature-title">Gestion des équipes</h3>
+          <p class="feature-description">Gérez facilement les équipes, les inscriptions et les compositions des équipes participantes.</p>
+          <a href="#" class="btn btn-sm btn-outline-primary">En savoir plus</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <i class="fas fa-calendar-alt feature-icon"></i>
+          </div>
+          <h3 class="feature-title">Planning optimisé</h3>
+          <p class="feature-description">Planifiez automatiquement les matchs, horaires et terrains pour une organisation parfaite.</p>
+          <a href="#" class="btn btn-sm btn-outline-primary">En savoir plus</a>
+        </div>
+      </div>
+      
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon-container">
+            <i class="fas fa-chart-line feature-icon"></i>
+          </div>
+          <h3 class="feature-title">Statistiques avancées</h3>
+          <p class="feature-description">Suivez les résultats, classements et statistiques en temps réel pour chaque équipe et joueur.</p>
+          <a href="#" class="btn btn-sm btn-outline-primary">En savoir plus</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tournaments Section -->
+<section class="tournaments-section py-5">
+  <div class="tournaments-pattern-bg"></div>
+  <div class="container position-relative">
+    <div class="row mb-5">
+      <div class="col-lg-8 mx-auto text-center">
+        <span class="section-badge"><i class="fas fa-fire me-1"></i>Compétitions</span>
+        <h2 class="section-title display-5 fw-bold mb-3">Tournois en cours</h2>
+        <p class="section-subtitle lead">Découvrez les compétitions actuellement en cours et rejoignez l'action!</p>
+        <div class="creative-divider">
+          <span class="divider-dot"></span>
+          <span class="divider-dot"></span>
+          <span class="divider-dot"></span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tournament-filters-bar mb-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="tournament-categories">
+          <a href="#" class="category-pill active"><i class="fas fa-trophy me-2"></i>Tous</a>
+          <a href="#" class="category-pill"><i class="fas fa-handshake me-2"></i>Amicaux</a>
+          <a href="#" class="category-pill"><i class="fas fa-medal me-2"></i>Championnats</a>
+          <a href="#" class="category-pill"><i class="fas fa-award me-2"></i>Coupes</a>
+        </div>
+        <div class="tournament-actions">
+          <a href="{% url 'tournois:liste' %}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-th-list me-1"></i> Tous les tournois
+          </a>
+          {% if user.is_authenticated and user.organisateur %}
+          <a href="{% url 'organisateurs:creer_tournoi' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Créer un tournoi
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="row g-4">
+      {% for tournament in tournois_en_cours|slice:":3" %}
+      <div class="col-md-4">
+        <div class="tournament-homepage-card h-100" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:"100" }}">
+          {% if forloop.first %}
+          <div class="featured-badge">
+            <i class="fas fa-star me-1"></i> Recommandé
+          </div>
+          {% endif %}
+          <div class="tournament-homepage-header">
+            <div class="tournament-logo-container">
+              <img src="{% if tournament.logo %}{{ tournament.logo.url }}{% else %}{% static 'tournoi/img/tournament-default.jpg' %}{% endif %}" 
+                   alt="{{ tournament.nom }}">
+            </div>
+            <div>
+              <h3 class="tournament-homepage-title">{{ tournament.nom }}</h3>
+              <div class="tournament-organizer">
+                <i class="fas fa-user-shield"></i> {{ tournament.organisateur.user.username }}
+              </div>
+            </div>
+            <div class="tournament-status-tag {% if tournament.est_termine %}tag-completed{% else %}tag-active{% endif %}">
+              {% if tournament.est_termine %}Terminé{% else %}En cours{% endif %}
+            </div>
+          </div>
+          
+          <div class="tournament-homepage-body">
+            <ul class="tournament-details-list">
+              <li class="tournament-detail-item">
+                <div class="tournament-detail-icon">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="tournament-detail-content">
+                  <div class="tournament-detail-label">Dates</div>
+                  <div class="tournament-detail-value">{{ tournament.date_debut|date:"d/m/Y" }}
+                  {% if tournament.date_fin %} - {{ tournament.date_fin|date:"d/m/Y" }}{% endif %}</div>
+                </div>
+              </li>
+              
+              <li class="tournament-detail-item">
+                <div class="tournament-detail-icon">
+                  <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="tournament-detail-content">
+                  <div class="tournament-detail-label">Lieu</div>
+                  <div class="tournament-detail-value">{{ tournament.lieu|default:"Lieu non précisé" }}</div>
+                </div>
+              </li>
+              
+              <li class="tournament-detail-item">
+                <div class="tournament-detail-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="tournament-detail-content">
+                  <div class="tournament-detail-label">Participation</div>
+                  <div class="tournament-detail-value">{{ tournament.inscriptions.count }}/{{ tournament.nombre_equipes_max }} équipes</div>
+                </div>
+              </li>
+            </ul>
+            
+            <div class="tournament-progress">
+              <div class="progress mt-3 mb-2" style="height: 8px;">
+                <div class="progress-bar" role="progressbar" 
+                     style="width: {% widthratio tournament.inscriptions.count tournament.nombre_equipes_max 100 %}%;" 
+                     aria-valuenow="{{ tournament.inscriptions.count }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="{{ tournament.nombre_equipes_max }}"></div>
+              </div>
+              <div class="progress-text text-end">
+                <small>{{ tournament.inscriptions.count }} sur {{ tournament.nombre_equipes_max }}</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tournament-homepage-footer">
+            <a href="{% url 'tournois:detail' tournament.id %}" class="btn btn-primary">
+              <i class="fas fa-trophy me-1"></i> Participer
+            </a>
+            <a href="{% url 'tournois:detail' tournament.id %}" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-eye me-1"></i> Détails
+            </a>
+          </div>
+          
+          <div class="floating-icons">
+            <div class="floating-icon"><i class="fas fa-futbol"></i></div>
+            <div class="floating-icon"><i class="fas fa-whistle"></i></div>
+            <div class="floating-icon"><i class="fas fa-trophy"></i></div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="empty-state text-center p-5 bg-white rounded shadow-sm">
+          <div class="empty-state-icon mb-4">
+            <i class="fas fa-calendar-times fa-4x text-muted"></i>
+          </div>
+          <h3 class="h4 mb-3">Aucun tournoi en cours</h3>
+          <p class="text-muted mb-4">Il n'y a pas de tournois en cours pour le moment. Revenez plus tard ou créez votre propre tournoi!</p>
+          <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'tournois:liste' %}" class="btn btn-outline-primary">
+              <i class="fas fa-list me-2"></i>Voir tous les tournois
+            </a>
+            <a href="{% url 'accounts:register' %}?role=organisateur" class="btn btn-primary">
+              <i class="fas fa-plus-circle me-2"></i>Créer un tournoi
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    {% if tournois_en_cours %}
+    <div class="text-center mt-5">
+      <a href="{% url 'tournois:liste' %}" class="btn btn-outline-primary btn-lg shine-button">
+        <i class="fas fa-list me-2"></i>Voir tous les tournois
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Ce que disent nos utilisateurs</h2>
+      <p class="section-subtitle">Découvrez les témoignages des organisateurs et participants qui utilisent TournoiPRO</p>
+    </div>
+    
+    <div class="row g-5">
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"TournoiPRO a révolutionné notre façon d'organiser des tournois. Tout est plus simple, plus rapide et nos participants adorent l'interface!"</p>
+          </div>
+          <div class="mt-4">
+            <h4 class="testimonial-name">Hassan Benali</h4>
+            <p class="testimonial-role">Organisateur - Club Casablanca</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"La gestion des équipes et des matchs est incroyablement facile. Nous avons gagné un temps précieux dans l'organisation de notre championnat."</p>
+          </div>
+          <div class="mt-4">
+            <h4 class="testimonial-name">Ali Oumehdi</h4>
+            <p class="testimonial-role">Responsable d'équipe - Wydad FC</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"En tant que joueur, j'apprécie de pouvoir consulter nos matchs, classements et statistiques en temps réel. Une application vraiment complète!"</p>
+          </div>
+          <div class="mt-4">
+            <h4 class="testimonial-name">Brahim El Mansouri</h4>
+            <p class="testimonial-role">Participant - Raja FC</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title">Prêt à transformer l'organisation de vos tournois ?</h2>
+      <p class="cta-text">Créez votre compte gratuitement et commencez à profiter de toutes les fonctionnalités de TournoiPRO dès aujourd'hui</p>
+      <div class="cta-buttons">
+        <a href="{% url 'accounts:register' %}" class="btn btn-light">
+          <i class="fas fa-user-plus me-2"></i> S'inscrire maintenant
+        </a>
+        <a href="{% url 'accounts:register' %}?role=organisateur" class="btn btn-success">
+          <i class="fas fa-plus-circle me-2"></i> Créer un tournoi
+        </a>
+        <a href="{% url 'tournois:liste' %}" class="btn btn-outline-light">
+          <i class="fas fa-search me-2"></i> Explorer les tournois
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Update countdowns for tournaments
+  const countdowns = document.querySelectorAll('.tournament-countdown');
+  
+  countdowns.forEach(countdown => {
+    const targetDate = new Date(countdown.dataset.date).getTime();
+    const countdownText = countdown.querySelector('.countdown-text');
+    
+    // Update the countdown every second
+    const updateCountdown = function() {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+      
+      // If the tournament has started
+      if (distance < 0) {
+        countdownText.textContent = 'En cours';
+        return;
+      }
+      
+      // Calculate days, hours, minutes
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      
+      if (days > 0) {
+        countdownText.textContent = `Dans ${days} jour${days > 1 ? 's' : ''}`;
+      } else if (hours > 0) {
+        countdownText.textContent = `Dans ${hours} heure${hours > 1 ? 's' : ''}`;
+      } else {
+        countdownText.textContent = `Dans ${minutes} min`;
+      }
+    };
+    
+    // Initial update
+    updateCountdown();
+    
+    // Update every minute
+    setInterval(updateCountdown, 60000);
+  });
+});
+</script>
+{% endblock %}

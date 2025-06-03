@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tournois Disponibles{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-500: #6c757d;
+    --gray-700: #495057;
+    --gray-900: #212529;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --transition: all 0.2s ease;
+}
+
+/* Cards pour les tournois */
+.tournament-card {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: white;
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    margin-bottom: 25px;
+    border: 1px solid var(--gray-200);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tournament-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.tournament-header {
+    height: 120px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    position: relative;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.tournament-header.expired {
+    background: linear-gradient(135deg, var(--gray-500), var(--gray-700));
+}
+
+.tournament-header.active {
+    background: linear-gradient(135deg, var(--success-color), #218838);
+}
+
+.tournament-header.upcoming {
+    background: linear-gradient(135deg, var(--info-color), #138496);
+}
+
+.tournament-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    z-index: 2;
+    margin: 0;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.tournament-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.5rem;
+    opacity: 0.7;
+}
+
+.tournament-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tournament-details {
+    margin-bottom: 0.7rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.8rem;
+    color: var(--gray-700);
+}
+
+.detail-icon {
+    width: 24px;
+    color: var(--gray-500);
+    margin-right: 0.7rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.detail-text {
+    flex-grow: 1;
+    line-height: 1.4;
+}
+
+.tournament-teams {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.team-tag {
+    display: inline-block;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: 0.3rem 0.6rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--gray-300);
+}
+
+.team-tag.registered {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--success-color);
+    border-color: rgba(40, 167, 69, 0.3);
+}
+
+.tournament-footer {
+    padding: 1rem 1.5rem;
+    background: var(--gray-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--gray-200);
+}
+
+.tournament-status {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.status-active, .status-upcoming, .status-expired {
+    display: flex;
+    align-items: center;
+}
+
+.status-active {
+    color: var(--success-color);
+}
+
+.status-upcoming {
+    color: var(--info-color);
+}
+
+.status-expired {
+    color: var(--gray-500);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-active .status-indicator {
+    background: var(--success-color);
+}
+
+.status-upcoming .status-indicator {
+    background: var(--info-color);
+}
+
+.status-expired .status-indicator {
+    background: var(--gray-500);
+}
+
+/* Filtre et recherche */
+.filters-bar {
+    background: white;
+    padding: 1.2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--gray-200);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--gray-200);
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: var(--gray-400);
+    margin-bottom: 1rem;
+}
+
+.inscrit-badge {
+    position: absolute;
+    top: 10px;
+    left: -25px;
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 4px 30px;
+    transform: rotate(-45deg);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- En-tête de page -->
+    <div class="page-header mb-4">
+        <div class="page-icon">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div class="page-title-group">
+            <h1 class="page-title">Tournois Disponibles</h1>
+            <p class="page-subtitle">Explorez les tournois en cours et à venir</p>
+        </div>
+        <a href="{% url 'participants:tableau_bord' %}" class="btn btn-outline-primary ms-auto">
+            <i class="fas fa-arrow-left me-2"></i> Retour au tableau de bord
+        </a>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="filters-bar d-flex flex-wrap justify-content-between align-items-center">
+        <div class="d-flex align-items-center mb-2 mb-md-0">
+            <div class="me-3">
+                <small class="text-muted d-block mb-1">Statut</small>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary active">Tous</button>
+                    <button type="button" class="btn btn-sm btn-outline-success">En cours</button>
+                    <button type="button" class="btn btn-sm btn-outline-info">À venir</button>
+                </div>
+            </div>
+        </div>
+        <div class="search-box">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Rechercher un tournoi...">
+                <button class="btn btn-outline-secondary" type="button"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des tournois -->
+    {% if tournois_info %}
+        <div class="row">
+            {% for info in tournois_info %}
+                {% with tournoi=info.tournoi %}
+                <div class="col-md-6 col-xl-4 mb-4">
+                    <div class="tournament-card">
+                        {% if info.est_inscrit %}
+                            <div class="inscrit-badge">Inscrit</div>
+                        {% endif %}
+                        
+                        <div class="tournament-header {% if tournoi.est_termine %}expired{% elif tournoi.date_debut <= today %}active{% else %}upcoming{% endif %}">
+                            <h3 class="tournament-name">{{ tournoi.nom }}</h3>
+                            <div class="tournament-icon"><i class="fas fa-trophy"></i></div>
+                        </div>
+                        
+                        <div class="tournament-body">
+                            <div class="tournament-details">
+                                <div class="detail-item">
+                                    <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <div class="detail-text">{{ tournoi.lieu|default:"Lieu non précisé" }}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                                    <div class="detail-text">
+                                        {{ tournoi.date_debut|date:"d/m/Y" }}
+                                        {% if tournoi.date_fin %} au {{ tournoi.date_fin|date:"d/m/Y" }}{% endif %}
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-icon"><i class="fas fa-info-circle"></i></div>
+                                    <div class="detail-text">{{ tournoi.description|truncatechars:100 }}</div>
+                                </div>
+                            </div>
+                            
+                            {% if info.equipes_inscrites %}
+                                <div class="tournament-teams">
+                                    <small class="text-muted d-block mb-2">Vos équipes inscrites:</small>
+                                    {% for equipe in info.equipes_inscrites %}
+                                        <span class="team-tag registered">
+                                            <i class="fas fa-check-circle me-1"></i> {{ equipe.nom }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="tournament-footer">
+                            <div class="tournament-status">
+                                {% if tournoi.est_termine %}
+                                    <div class="status-expired">
+                                        <span class="status-indicator"></span> Terminé
+                                    </div>
+                                {% elif tournoi.date_debut <= today %}
+                                    <div class="status-active">
+                                        <span class="status-indicator"></span> En cours
+                                    </div>
+                                {% else %}
+                                    <div class="status-upcoming">
+                                        <span class="status-indicator"></span> À venir
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'tournois:detail' tournoi.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i> Détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endwith %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
+            <h3>Aucun tournoi disponible</h3>
+            <p>Il n'y a pas de tournois en cours ou à venir pour le moment. Revenez plus tard pour découvrir les nouveaux tournois.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

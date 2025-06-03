@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Politique de Confidentialité - TournoiPRO{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-12">
+      <!-- Fil d'ariane -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Politique de Confidentialité</li>
+        </ol>
+      </nav>
+      
+      <!-- En-tête de page -->
+      <div class="mb-5">
+        <h1 class="mb-3 fw-bold">Politique de Confidentialité</h1>
+        <p class="text-muted">Dernière mise à jour : {% now "j F Y" %}</p>
+      </div>
+      
+      <!-- Contenu -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">1. Introduction</h2>
+          <p>Bienvenue sur la politique de confidentialité de TournoiPRO. Chez TournoiPRO, nous accordons une grande importance à la protection de vos données personnelles. Cette politique de confidentialité explique comment nous collectons, utilisons, partageons et protégeons vos informations personnelles lorsque vous utilisez notre plateforme.</p>
+          <p>En utilisant TournoiPRO, vous acceptez les pratiques décrites dans la présente politique de confidentialité. Si vous n'acceptez pas cette politique, veuillez ne pas utiliser notre site et nos services.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">2. Informations que nous collectons</h2>
+          <p>Nous collectons les informations suivantes :</p>
+          <ul>
+            <li><strong>Informations d'identification :</strong> nom, prénom, adresse e-mail, mot de passe lors de la création d'un compte.</li>
+            <li><strong>Informations de profil :</strong> photo de profil, date de naissance, numéro de téléphone, position de jeu préférée.</li>
+            <li><strong>Informations sur les équipes et tournois :</strong> informations sur les équipes que vous créez ou auxquelles vous appartenez, les tournois auxquels vous participez.</li>
+            <li><strong>Données de navigation :</strong> adresse IP, type de navigateur, pages visitées, date et heure de connexion.</li>
+            <li><strong>Cookies et technologies similaires :</strong> pour améliorer votre expérience utilisateur et collecter des statistiques d'utilisation.</li>
+          </ul>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">3. Utilisation de vos informations</h2>
+          <p>Nous utilisons vos informations personnelles pour :</p>
+          <ul>
+            <li>Fournir, maintenir et améliorer notre plateforme</li>
+            <li>Créer et gérer votre compte utilisateur</li>
+            <li>Faciliter la participation aux tournois et la gestion des équipes</li>
+            <li>Vous envoyer des notifications importantes concernant votre compte, les tournois et les matchs</li>
+            <li>Répondre à vos demandes et questions</li>
+            <li>Détecter et prévenir les activités frauduleuses ou les violations de nos conditions d'utilisation</li>
+            <li>Personnaliser votre expérience utilisateur et vous proposer du contenu pertinent</li>
+          </ul>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">4. Partage des informations</h2>
+          <p>Nous pouvons partager vos informations personnelles avec :</p>
+          <ul>
+            <li><strong>Les organisateurs de tournois :</strong> nom, prénom et informations de profil joueur pour la gestion des tournois.</li>
+            <li><strong>Les membres de votre équipe :</strong> informations de base pour faciliter la communication au sein de l'équipe.</li>
+            <li><strong>Les prestataires de services :</strong> qui nous aident à exploiter notre plateforme (hébergement, traitement des paiements, services d'analyse).</li>
+            <li><strong>Les autorités légales :</strong> si la loi l'exige ou pour protéger nos droits légaux.</li>
+          </ul>
+          <p>Nous ne vendons jamais vos informations personnelles à des tiers.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">5. Sécurité des données</h2>
+          <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger vos informations personnelles contre la perte, l'accès non autorisé, la divulgation, l'altération et la destruction. Cependant, aucune méthode de transmission sur Internet ou de stockage électronique n'est totalement sûre.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">6. Conservation des données</h2>
+          <p>Nous conservons vos informations personnelles aussi longtemps que nécessaire pour fournir nos services, respecter nos obligations légales, résoudre les litiges et faire respecter nos accords. Si vous supprimez votre compte, nous supprimerons ou anonymiserons vos informations personnelles dans un délai raisonnable, sauf si la loi nous oblige à les conserver.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">7. Vos droits</h2>
+          <p>Selon votre lieu de résidence, vous pouvez disposer des droits suivants concernant vos données personnelles :</p>
+          <ul>
+            <li>Droit d'accès à vos données personnelles</li>
+            <li>Droit de rectification des données inexactes</li>
+            <li>Droit à l'effacement de vos données (droit à l'oubli)</li>
+            <li>Droit à la limitation du traitement</li>
+            <li>Droit à la portabilité des données</li>
+            <li>Droit d'opposition au traitement</li>
+          </ul>
+          <p>Pour exercer ces droits, veuillez nous contacter à l'adresse : <a href="mailto:contact@tournoipro.com">contact@tournoipro.com</a></p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">8. Modifications de la politique de confidentialité</h2>
+          <p>Nous nous réservons le droit de modifier cette politique de confidentialité à tout moment. Toute modification sera publiée sur cette page avec une date de mise à jour. Nous vous encourageons à consulter régulièrement notre politique de confidentialité.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">9. Contact</h2>
+          <p>Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à l'adresse suivante :</p>
+          <address class="mb-0">
+            <strong>TournoiPRO</strong><br>
+            123 Rue du Sport<br>
+            75001 Paris, France<br>
+            Email: <a href="mailto:contact@tournoipro.com">contact@tournoipro.com</a><br>
+            Téléphone: +33 1 23 45 67 89
+          </address>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .card {
+    border-radius: 10px;
+    border: none;
+  }
+  
+  h1 {
+    color: #0c2461;
+  }
+  
+  h2 {
+    color: #1e3799;
+  }
+  
+  hr {
+    background-color: #eaeaea;
+    opacity: 0.7;
+  }
+  
+  .breadcrumb {
+    background-color: transparent;
+    padding: 0;
+  }
+  
+  .breadcrumb-item a {
+    color: #4a69bd;
+    text-decoration: none;
+  }
+  
+  .breadcrumb-item a:hover {
+    color: #0c2461;
+    text-decoration: underline;
+  }
+  
+  .breadcrumb-item.active {
+    color: #718096;
+  }
+</style>
+{% endblock %} 

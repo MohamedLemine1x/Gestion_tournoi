@@ -1,0 +1,419 @@
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load django_bootstrap5 %}
+{% load humanize %}
+{% load widget_tweaks %}
+{% load account_filters %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{% block meta_description %}TournoiPRO - La plateforme de référence pour l'organisation et la gestion de tournois de football{% endblock %}">
+  <meta name="keywords" content="{% block meta_keywords %}tournoi football, gestion tournoi, compétition football{% endblock %}">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  {% csrf_token %}
+  <title>{% block title %}TournoiPRO - La référence des tournois de football{% endblock %}</title>
+  
+  <!-- Resource hints to improve loading -->
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://code.jquery.com">
+  <link rel="dns-prefetch" href="https://unpkg.com">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <link rel="icon" href="{% static 'img/football-icon.svg' %}" type="image/svg+xml">
+  <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  
+  <!-- Critical CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"></noscript>
+  
+  <!-- Defer non-critical CSS -->
+  <link rel="preload" href="{% static 'css/style.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="https://unpkg.com/aos@2.3.1/dist/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="{% static 'css/football-icons.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  
+  <noscript>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    <link rel="stylesheet" href="{% static 'css/football-icons.css' %}">
+  </noscript>
+  
+  <!-- Critical CSS inline -->
+  <style>
+    /* Critical rendering path CSS */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1 0 auto;
+    }
+    #preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      background-color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .loader-wrapper {
+      text-align: center;
+    }
+    .soccer-ball {
+      font-size: 3rem;
+      color: #4a69bd;
+      animation: bounce 1s infinite alternate;
+    }
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-20px); }
+    }
+    .loading-text {
+      margin-top: 1rem;
+      color: #2d3748;
+      font-weight: 600;
+    }
+    .progress-bar {
+      width: 200px;
+      height: 8px;
+      background-color: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem auto 0;
+    }
+    .progress {
+      height: 100%;
+      background-color: #4a69bd;
+      border-radius: 4px;
+      width: 0%;
+      animation: progress 2s ease-in-out forwards;
+    }
+    @keyframes progress {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+    
+    /* Toast messages */
+    .login-required-toast {
+      min-width: 350px;
+      box-shadow: 0 0.5rem 1rem rgba(220, 53, 69, 0.3) !important;
+      border-left: 4px solid #dc3545 !important;
+    }
+    .access-denied-toast {
+      min-width: 350px;
+      box-shadow: 0 0.5rem 1rem rgba(255, 193, 7, 0.3) !important;
+      border-left: 4px solid #ffc107 !important;
+    }
+    .toast {
+      opacity: 1 !important;
+    }
+    #notification-indicator {
+      transition: all 0.3s ease;
+      transform: scale(0);
+    }
+    #notification-indicator.show {
+      transform: scale(1);
+    }
+    #notification-indicator:hover {
+      background-color: #0056b3 !important;
+      transform: scale(1.1);
+    }
+  </style>
+  
+  <!-- Load minimal font subset first -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" as="style">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"></noscript>
+  
+  <!-- Preload critical JavaScript -->
+  <link rel="preload" href="/static/js/csrf_fix.js" as="script">
+  
+  {% block extra_css %}{% endblock %}
+  
+  <!-- Preconnect to required origins -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+  <!-- Preloader -->
+  <div id="preloader">
+    <div class="loader-wrapper">
+      <div class="soccer-ball">
+        <i class="fas fa-futbol"></i>
+      </div>
+      <h3 class="loading-text">TournoiPRO</h3>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Header -->
+  {% include 'navbar.html' %}
+  
+  <!-- Messages -->
+  {% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;" id="toast-container">
+    {% for message in messages %}
+    <div class="toast show shadow-lg border-0 overflow-hidden {% if 'login_required' in message.extra_tags %}login-required-toast{% endif %} {% if 'access_denied' in message.extra_tags %}access-denied-toast{% endif %}" 
+         role="alert" aria-live="assertive" aria-atomic="true" 
+         data-bs-autohide="{% if message.tags == 'error' or message.tags == 'warning' or 'login_required' in message.extra_tags %}false{% else %}true{% endif %}" 
+         data-bs-delay="{% if message.tags == 'success' %}3000{% else %}5000{% endif %}">
+      <div class="toast-header {% if message.tags == 'success' %}bg-success text-white{% elif message.tags == 'error' %}bg-danger text-white{% elif message.tags == 'warning' %}bg-warning text-dark{% else %}bg-info text-white{% endif %}">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+        <strong class="me-auto">TournoiPRO</strong>
+        <small class="text-white-50">{% if message.tags == 'error' or 'login_required' in message.extra_tags %}Important{% endif %}</small>
+        <button type="button" class="btn-close {% if message.tags != 'warning' %}btn-close-white{% endif %}" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        {{ message }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  
+  <!-- Notification indicator -->
+  <div id="notification-indicator" class="d-none position-fixed bottom-0 start-0 m-3 rounded-circle bg-primary text-white" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); z-index: 999;">
+    <span class="count">0</span>
+  </div>
+  
+  <style>
+    .notification-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      line-height: 1;
+      min-width: 18px;
+      text-align: center;
+      border-radius: 50px;
+      background-color: #e53e3e;
+      color: white;
+      transform: translate(50%, -50%);
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(229, 62, 62, 0.4);
+    }
+    
+    .bell-animation {
+      animation: bell-ring 0.6s ease;
+      transform-origin: top;
+    }
+    
+    @keyframes bell-ring {
+      0% { transform: rotate(0); }
+      20% { transform: rotate(15deg); }
+      40% { transform: rotate(-15deg); }
+      60% { transform: rotate(7deg); }
+      80% { transform: rotate(-7deg); }
+      100% { transform: rotate(0); }
+    }
+  </style>
+  
+  <!-- Main Content -->
+  <main class="content-wrapper">
+    {% block content %}{% endblock %}
+  </main>
+  
+  <!-- Footer -->
+  {% include 'footer.html' %}
+  
+  <!-- Back to top button -->
+  <a href="#" class="back-to-top" id="backToTop">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+  
+  <!-- CSRF Fix Script - Critical -->
+  <script src="/static/js/csrf_fix.js"></script>
+
+  <!-- CSS loading polyfill -->
+  <script>
+    // Simple polyfill for CSS preload
+    (function() {
+      var cssLoaded = {};
+      
+      function loadCSS(url) {
+        if (cssLoaded[url]) return;
+        
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = url;
+        document.head.appendChild(link);
+        cssLoaded[url] = true;
+      }
+      
+      window.loadCSS = loadCSS;
+      
+      // Apply polyfill if needed
+      var links = document.querySelectorAll('link[rel="preload"][as="style"]');
+      for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        if (!link.getAttribute('onload')) {
+          loadCSS(link.href);
+        }
+      }
+    })();
+  </script>
+
+  <!-- Load all scripts in order of importance -->
+  <script>
+    // Init preloader
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+          preloader.style.display = 'none';
+        }
+      }, 500);
+    });
+    
+    // Helper function to load script with priority
+    function loadScript(src, priority, callback) {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = priority !== 'high';
+      script.defer = priority !== 'high';
+      
+      if (callback) {
+        script.onload = callback;
+        script.onerror = function() {
+          console.error('Failed to load script:', src);
+          // Call the callback anyway to prevent blocking
+          callback();
+        };
+      }
+      
+      document.body.appendChild(script);
+      return script;
+    }
+    
+    // Define script loading order
+    const highPriorityScripts = [
+      'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js'
+    ];
+    
+    const mediumPriorityScripts = [
+      'https://code.jquery.com/jquery-3.6.0.min.js'
+    ];
+    
+    const lowPriorityScripts = [
+      '{% static "js/notifications.js" %}',
+      '{% static "js/main.js" %}',
+      'https://unpkg.com/aos@next/dist/aos.js',
+      '{% static "js/script.js" %}'
+    ];
+    
+    // Init Bootstrap toasts
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load high priority scripts immediately
+      let scriptsLoaded = 0;
+      const totalHighPriorityScripts = highPriorityScripts.length;
+      
+      highPriorityScripts.forEach(function(src) {
+        loadScript(src, 'high', function() {
+          scriptsLoaded++;
+          if (scriptsLoaded === totalHighPriorityScripts) {
+            // When high priority scripts are loaded, init toasts
+            initializeToasts();
+            
+            // Then load medium priority scripts
+            let mediumScriptsLoaded = 0;
+            const totalMediumScripts = mediumPriorityScripts.length;
+            
+            if (totalMediumScripts === 0) {
+              loadLowPriorityScripts();
+            } else {
+              mediumPriorityScripts.forEach(function(src) {
+                loadScript(src, 'medium', function() {
+                  mediumScriptsLoaded++;
+                  if (mediumScriptsLoaded === totalMediumScripts) {
+                    // When medium priority scripts are done, load low priority
+                    loadLowPriorityScripts();
+                  }
+                });
+              });
+            }
+          }
+        });
+      });
+    });
+    
+    function initializeToasts() {
+      // Check if bootstrap is available first
+      if (typeof bootstrap !== 'undefined') {
+        document.querySelectorAll('.toast').forEach(function(toastEl) {
+          try {
+            new bootstrap.Toast(toastEl, {
+              autohide: toastEl.dataset.bsAutohide === 'true',
+              delay: parseInt(toastEl.dataset.bsDelay || 5000)
+            }).show();
+          } catch (error) {
+            console.error('Error initializing toast:', error);
+          }
+        });
+      } else {
+        console.warn('Bootstrap not loaded, toasts will not be initialized');
+      }
+    }
+    
+    function loadLowPriorityScripts() {
+      // Use requestIdleCallback if available, otherwise setTimeout
+      const scheduler = window.requestIdleCallback || function(cb) { setTimeout(cb, 50); };
+      
+      scheduler(function() {
+        lowPriorityScripts.forEach(function(src, index) {
+          // Add delay between script loads
+          setTimeout(function() {
+            loadScript(src, 'low', function() {
+              if (src.includes('notifications.js')) {
+                // Dispatch event that notifications are ready
+                document.dispatchEvent(new Event('notificationsReady'));
+              }
+              if (src.includes('aos.js')) {
+                // Initialize AOS when loaded
+                initializeAOS();
+              }
+            });
+          }, index * 100); // 100ms delay between each script
+        });
+      });
+    }
+    
+    function initializeAOS() {
+      if (typeof AOS !== 'undefined') {
+        try {
+          AOS.init({ 
+            once: true,
+            disable: window.innerWidth < 768,
+            duration: 600
+          });
+        } catch (error) {
+          console.error('Error initializing AOS:', error);
+        }
+      }
+    }
+  </script>
+  
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

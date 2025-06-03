@@ -1,0 +1,514 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Créer une équipe{% endblock %}
+
+{% block extra_css %}
+<style>
+.creation-equipe {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.creation-equipe .card {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.creation-equipe .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.creation-equipe .card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    padding: 1.5rem;
+}
+
+.creation-equipe .card-body {
+    padding: 2rem;
+}
+
+.creation-equipe .form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.creation-equipe .form-control {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.creation-equipe .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.creation-equipe .btn-primary {
+    background: #007bff;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.creation-equipe .btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.2);
+}
+
+.creation-equipe .btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    margin-right: 1rem;
+}
+
+.creation-equipe .btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.creation-equipe .logo-preview-container {
+    width: 170px;
+    height: 170px;
+    margin: 1rem auto;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.creation-equipe .logo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.creation-equipe .logo-preview.active {
+    display: block;
+}
+
+.creation-equipe .logo-placeholder {
+    color: #6c757d;
+    font-size: 3rem;
+    opacity: 0.5;
+}
+
+.creation-equipe .logo-placeholder.hidden {
+    display: none;
+}
+
+.creation-equipe .help-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.creation-equipe .alert {
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.creation-equipe .progress-container {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.creation-equipe .progress {
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.creation-equipe .progress-bar {
+    background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+    transition: width 0.3s ease;
+    width: 33.33%;
+}
+
+.creation-equipe .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.creation-equipe .step {
+    position: relative;
+    z-index: 2;
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e9ecef;
+    color: #6c757d;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.creation-equipe .step.active {
+    border-color: #007bff;
+    color: #007bff;
+    background: white;
+    transform: scale(1.1);
+}
+
+.creation-equipe .step-label {
+    position: absolute;
+    top: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.creation-equipe .step.active .step-label {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.creation-equipe .custom-file-upload {
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.creation-equipe .custom-file-upload:hover {
+    background: #e9ecef;
+}
+
+.creation-equipe .custom-file-upload i {
+    margin-right: 0.5rem;
+}
+
+/* Validation styles */
+.creation-equipe .is-valid {
+    border-color: #28a745 !important;
+    padding-right: calc(1.5em + .75rem) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right calc(.375em + .1875rem) center !important;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem) !important;
+}
+
+.creation-equipe .form-control.is-invalid:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .creation-equipe {
+        padding: 0.5rem;
+    }
+    
+    .creation-equipe .card-body {
+        padding: 1rem;
+    }
+    
+    .creation-equipe .step-label {
+        display: none;
+    }
+    
+    .creation-equipe .btn-primary,
+    .creation-equipe .btn-outline-secondary {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="creation-equipe">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">
+                <i class="fas fa-users me-2"></i>
+                Créer votre équipe
+            </h2>
+            <p class="mb-0 mt-2 opacity-75">
+                Remplissez les informations ci-dessous pour créer votre équipe
+            </p>
+        </div>
+        
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="progress-container">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                
+                <div class="progress-steps">
+                    <div class="step active">
+                        1
+                        <span class="step-label">Informations</span>
+                    </div>
+                    <div class="step">
+                        2
+                        <span class="step-label">Membres</span>
+                    </div>
+                    <div class="step">
+                        3
+                        <span class="step-label">Confirmation</span>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" id="equipeForm" novalidate>
+                {% csrf_token %}
+                
+                <!-- Nom de l'équipe -->
+                <div class="mb-4">
+                    <label for="{{ form.nom.id_for_label }}" class="form-label">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        {{ form.nom.label }} <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control {% if form.nom.errors %}is-invalid{% endif %}" 
+                           id="{{ form.nom.id_for_label }}"
+                           name="{{ form.nom.name }}"
+                           value="{{ form.nom.value|default:'' }}"
+                           placeholder="Ex: Les Champions, Team Alpha..."
+                           required>
+                    {% if form.nom.errors %}
+                        <div class="invalid-feedback">{{ form.nom.errors.0 }}</div>
+                    {% endif %}
+                    <div class="help-text">
+                        Choisissez un nom unique et représentatif pour votre équipe
+                    </div>
+                    <div id="nomFeedback" class="valid-feedback">
+                        Ce nom semble bon !
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="mb-4">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        <i class="fas fa-align-left me-2"></i>
+                        {{ form.description.label }} <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                              id="{{ form.description.id_for_label }}"
+                              name="{{ form.description.name }}"
+                              rows="4"
+                              placeholder="Décrivez votre équipe : ses objectifs, son histoire, ses valeurs..."
+                              required>{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                        <div class="invalid-feedback">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                    <div class="help-text">
+                        Une description détaillée aidera les autres équipes à mieux vous connaître
+                    </div>
+                    <div id="descriptionFeedback" class="valid-feedback">
+                        Excellente description !
+                    </div>
+                    <div class="mt-1" id="charCount"><span id="currentChars">0</span> / 10 caractères minimum</div>
+                </div>
+                
+                <!-- Logo -->
+                <div class="mb-4">
+                    <label for="{{ form.logo.id_for_label }}" class="form-label">
+                        <i class="fas fa-image me-2"></i>
+                        {{ form.logo.label }}
+                    </label>
+                    
+                    <div class="logo-preview-container">
+                        <img id="logoPreview" class="logo-preview" src="#" alt="Aperçu du logo">
+                        <div id="logoPlaceholder" class="logo-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <label for="{{ form.logo.id_for_label }}" class="custom-file-upload">
+                            <i class="fas fa-upload"></i> Choisir un logo
+                        </label>
+                        <input type="file" 
+                               class="form-control d-none {% if form.logo.errors %}is-invalid{% endif %}" 
+                               id="{{ form.logo.id_for_label }}"
+                               name="{{ form.logo.name }}"
+                               accept="image/*"
+                               onchange="previewLogo(this)">
+                    </div>
+                    
+                    {% if form.logo.errors %}
+                        <div class="invalid-feedback d-block text-center mt-2">{{ form.logo.errors.0 }}</div>
+                    {% endif %}
+                    <div class="help-text text-center">
+                        Format JPG, PNG ou GIF, max 2MB
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-5">
+                    <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Retour au tableau de bord
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check me-2"></i>
+                        Créer mon équipe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewLogo(input) {
+    const preview = document.getElementById('logoPreview');
+    const placeholder = document.getElementById('logoPlaceholder');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.add('active');
+            placeholder.classList.add('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.classList.remove('active');
+        placeholder.classList.remove('hidden');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('equipeForm');
+    const nomInput = document.getElementById('{{ form.nom.id_for_label }}');
+    const descriptionInput = document.getElementById('{{ form.description.id_for_label }}');
+    const charCountEl = document.getElementById('currentChars');
+
+    // Validation en temps réel pour le nom
+    nomInput.addEventListener('input', function() {
+        const nomValue = nomInput.value.trim();
+        
+        if (nomValue.length >= 3) {
+            nomInput.classList.remove('is-invalid');
+            nomInput.classList.add('is-valid');
+        } else {
+            nomInput.classList.remove('is-valid');
+            if (nomValue.length > 0) {
+                nomInput.classList.add('is-invalid');
+            } else {
+                nomInput.classList.remove('is-invalid');
+            }
+        }
+    });
+
+    // Validation en temps réel pour la description
+    descriptionInput.addEventListener('input', function() {
+        const descValue = descriptionInput.value.trim();
+        charCountEl.textContent = descValue.length;
+        
+        if (descValue.length >= 10) {
+            descriptionInput.classList.remove('is-invalid');
+            descriptionInput.classList.add('is-valid');
+            charCountEl.style.color = '#28a745';
+        } else {
+            descriptionInput.classList.remove('is-valid');
+            if (descValue.length > 0) {
+                descriptionInput.classList.add('is-invalid');
+                charCountEl.style.color = '#dc3545';
+            } else {
+                descriptionInput.classList.remove('is-invalid');
+                charCountEl.style.color = '#6c757d';
+            }
+        }
+    });
+
+    // Si les champs ont déjà des valeurs (par exemple, après un échec de validation)
+    if (nomInput.value.trim().length >= 3) {
+        nomInput.classList.add('is-valid');
+    }
+    
+    if (descriptionInput.value.trim().length >= 10) {
+        descriptionInput.classList.add('is-valid');
+        charCountEl.textContent = descriptionInput.value.trim().length;
+        charCountEl.style.color = '#28a745';
+    } else if (descriptionInput.value.trim().length > 0) {
+        charCountEl.textContent = descriptionInput.value.trim().length;
+    }
+
+    // Validation du formulaire
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validation du nom
+        if (nomInput.value.trim().length < 3) {
+            nomInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Validation de la description
+        if (descriptionInput.value.trim().length < 10) {
+            descriptionInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Faire défiler jusqu'au premier champ invalide
+            document.querySelector('.is-invalid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+});
+</script>
+{% endblock %} 

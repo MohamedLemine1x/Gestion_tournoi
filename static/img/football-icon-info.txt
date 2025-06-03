@@ -1,0 +1,16 @@
+Une icône de football (⚽) a été ajoutée à votre projet sous deux formats:
+
+1. football-icon.svg - Format vectoriel qui s'adapte à toutes les tailles sans perte de qualité
+2. 
+Pour utiliser ces icônes dans votre projet Django:
+
+- Dans un template HTML: 
+  {% load static %}
+  <img src="{% static 'img/football-icon.svg' %}" alt="Football Icon">
+
+- En CSS:
+  .football-icon {
+    background-image: url('../img/football-icon.svg');
+  }
+
+Cette icône est prête à être utilisée dans votre application de gestion de tournoi de football. 

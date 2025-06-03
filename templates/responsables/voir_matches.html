@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+
+{% block title %}Matchs à venir{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Styles pour améliorer l'UX */
+.match-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.match-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.match-header {
+    padding: 1.25rem;
+    border-bottom: none;
+}
+
+.match-header.tournoi {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.match-header.amicaux {
+    background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+}
+
+.match-date {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.match-time {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.match-status {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.match-status.upcoming {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.match-status.today {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.match-status.past {
+    background-color: #f5f5f5;
+    color: #616161;
+}
+
+.match-actions {
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+}
+
+.match-actions:hover {
+    opacity: 1;
+}
+
+.quick-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.quick-filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid #dee2e6;
+    background: white;
+}
+
+.quick-filter-btn:hover, .quick-filter-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.match-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.match-info-card {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.match-info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.match-info-icon.location {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.match-info-icon.tournament {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.match-info-icon.team {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .match-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-filters {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- En-tête avec titre et actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-calendar-check"></i> Matchs à venir</h1>
+            <p class="text-muted mb-0">Gérez et suivez les prochains matchs de votre équipe</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'matchs:creer_match' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Nouveau match
+            </a>
+            <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Tableau de bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres rapides -->
+    <div class="quick-filters">
+        <a href="?tri=date" class="quick-filter-btn {% if request.GET.tri == 'date' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i> Par date
+        </a>
+        <a href="?tri=tournoi" class="quick-filter-btn {% if request.GET.tri == 'tournoi' %}active{% endif %}">
+            <i class="fas fa-trophy"></i> Par tournoi
+        </a>
+        <a href="?tri=domicile" class="quick-filter-btn {% if request.GET.tri == 'domicile' %}active{% endif %}">
+            <i class="fas fa-home"></i> À domicile
+        </a>
+        <a href="?tri=exterieur" class="quick-filter-btn {% if request.GET.tri == 'exterieur' %}active{% endif %}">
+            <i class="fas fa-plane"></i> À l'extérieur
+        </a>
+    </div>
+
+    {% if total_matchs > 0 %}
+        <!-- Matchs de tournoi -->
+        {% if matchs_confirmes %}
+        <div class="card match-card mb-4">
+            <div class="card-header match-header tournoi d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 text-white"><i class="fas fa-trophy"></i> Matchs de tournoi</h5>
+                    <small class="text-white-50">{{ matchs_confirmes.count }} match(s) programmé(s)</small>
+                </div>
+                <span class="badge bg-light text-dark">
+                    Prochain : {{ matchs_confirmes.0.date_match|date:"d/m/Y" }}
+                </span>
+            </div>
+            <div class="card-body">
+                {% for match in matchs_confirmes %}
+                <div class="match-info-grid mb-3">
+                    <div class="match-info-card">
+                        <div class="match-info-icon tournament">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div>
+                            <div class="match-date">{{ match.date_match|date:"d/m/Y" }}</div>
+                            <div class="match-time">{{ match.date_match|date:"H:i" }}</div>
+                        </div>
+                    </div>
+                    <div class="match-info-card">
+                        <div class="match-info-icon team">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            {% if match.equipe_domicile == equipe %}
+                                <strong>{{ equipe.nom }}</strong> vs {{ match.equipe_exterieur.nom }}
+                                <div class="text-muted small">À domicile</div>
+                            {% else %}
+                                {{ match.equipe_domicile.nom }} vs <strong>{{ equipe.nom }}</strong>
+                                <div class="text-muted small">À l'extérieur</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="match-info-card">
+                        <div class="match-info-icon location">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            {{ match.lieu_match|default:"À définir" }}
+                            {% if match.lieu_match %}
+                                <a href="https://maps.google.com/?q={{ match.lieu_match }}" target="_blank" class="btn btn-sm btn-link p-0">
+                                    <i class="fas fa-external-link-alt"></i> Voir sur la carte
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                    <div>
+                        <span class="badge bg-success">{{ match.tournoi.nom }}</span>
+                        <span class="badge bg-info">{{ match.tournoi.categorie }}</span>
+                        <span class="badge bg-secondary">
+                            <i class="fas fa-user-edit"></i> Créé par {{ match.equipe_createur.nom }}
+                        </span>
+                    </div>
+                    <div class="match-actions">
+                        <a href="{% url 'matchs:detail' match.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i> Détails
+                        </a>
+                        {% if match.date_match|date:"Y-m-d" >= now|date:"Y-m-d" %}
+                            <a href="{% url 'matchs:modifier' match.id %}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Matchs amicaux -->
+        {% if matchs_amicaux %}
+        <div class="card match-card mb-4">
+            <div class="card-header match-header amicaux d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 text-white"><i class="fas fa-handshake"></i> Matchs amicaux</h5>
+                    <small class="text-white-50">{{ matchs_amicaux.count }} match(s) programmé(s)</small>
+                </div>
+                <span class="badge bg-light text-dark">
+                    Prochain : {{ matchs_amicaux.0.date_match|date:"d/m/Y" }}
+                </span>
+            </div>
+            <div class="card-body">
+                {% for match in matchs_amicaux %}
+                <div class="match-info-grid mb-3">
+                    <div class="match-info-card">
+                        <div class="match-info-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div>
+                            <div class="match-date">{{ match.date_match|date:"d/m/Y" }}</div>
+                            <div class="match-time">{{ match.date_match|date:"H:i" }}</div>
+                        </div>
+                    </div>
+                    <div class="match-info-card">
+                        <div class="match-info-icon team">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            {% if match.equipe_domicile == equipe %}
+                                <strong>{{ equipe.nom }}</strong> vs {{ match.equipe_exterieur.nom }}
+                                <div class="text-muted small">À domicile</div>
+                            {% else %}
+                                {{ match.equipe_domicile.nom }} vs <strong>{{ equipe.nom }}</strong>
+                                <div class="text-muted small">À l'extérieur</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="match-info-card">
+                        <div class="match-info-icon location">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            {{ match.lieu_match|default:"À définir" }}
+                            {% if match.lieu_match %}
+                                <a href="https://maps.google.com/?q={{ match.lieu_match }}" target="_blank" class="btn btn-sm btn-link p-0">
+                                    <i class="fas fa-external-link-alt"></i> Voir sur la carte
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                    <div>
+                        <span class="match-status upcoming">À venir</span>
+                        <span class="badge bg-secondary">
+                            <i class="fas fa-user-edit"></i> Créé par {{ match.equipe_createur.nom }}
+                        </span>
+                    </div>
+                    <div class="match-actions">
+                        <a href="{% url 'matchs:detail' match.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i> Détails
+                        </a>
+                        {% if match.date_match|date:"Y-m-d" >= now|date:"Y-m-d" %}
+                            <a href="{% url 'matchs:modifier' match.id %}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-calendar-times"></i>
+            </div>
+            <h4 class="mb-3">Aucun match à venir</h4>
+            <p class="text-muted mb-4">Votre équipe n'a pas de matchs programmés pour le moment.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'tournois:liste' %}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Rechercher des tournois
+                </a>
+                <a href="{% url 'matchs:creer_match' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Créer un match amical
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

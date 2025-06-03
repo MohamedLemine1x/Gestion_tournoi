@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex align-items-center">
+                <img src="{% static 'img/football-icon.svg' %}" alt="Logo Tournoi" class="me-3" style="height: 40px; width: auto;">
+                <h3 class="mb-0">{{ title }}</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label for="nom" class="form-label">Nom du tournoi *</label>
+                        <input type="text" class="form-control" id="nom" name="nom" placeholder="Entrez le nom du tournoi" required value="{{ tournoi.nom|default:'' }}">
+                        <div class="invalid-feedback">
+                            Veuillez entrer un nom pour le tournoi.
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="nombre_equipes_max" class="form-label">Nombre d'équipes maximum</label>
+                        <input type="number" class="form-control" id="nombre_equipes_max" name="nombre_equipes_max" value="{{ tournoi.nombre_equipes_max|default:'16' }}" min="2" max="64">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Décrivez votre tournoi">{{ tournoi.description|default:'' }}</textarea>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="date_debut" class="form-label">Date de début *</label>
+                        <input type="date" class="form-control" id="date_debut" name="date_debut" required min="{{ today|date:'Y-m-d' }}" value="{{ tournoi.date_debut|date:'Y-m-d'|default:'' }}">
+                        <div class="invalid-feedback">
+                            Veuillez choisir une date de début valide.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="date_fin" class="form-label">Date de fin</label>
+                        <input type="date" class="form-control" id="date_fin" name="date_fin" value="{{ tournoi.date_fin|date:'Y-m-d'|default:'' }}">
+                        <small class="text-muted">Laissez vide si le tournoi se déroule sur un seul jour</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="lieu" class="form-label">Lieu</label>
+                    <input type="text" class="form-control" id="lieu" name="lieu" placeholder="Entrez le lieu du tournoi" value="{{ tournoi.lieu|default:'' }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="logo" class="form-label">Logo du tournoi</label>
+                    <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                    <small class="text-muted">Format recommandé: JPG, PNG ou GIF. Taille max: 2MB</small>
+                    {% if tournoi.logo %}
+                    <div class="mt-2">
+                        <p>Logo actuel:</p>
+                        <img src="{{ tournoi.logo.url }}" alt="Logo du tournoi" style="max-height: 100px; max-width: 200px;">
+                    </div>
+                    {% endif %}
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'organisateurs:dashboard' %}" class="btn btn-outline-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Script pour activer la validation bootstrap
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+
+    // Script pour vérifier que la date de fin est après la date de début
+    document.getElementById('date_debut').addEventListener('change', function() {
+        document.getElementById('date_fin').min = this.value;
+    });
+
+    // Script pour prévisualiser l'image du logo avant l'upload
+    document.getElementById('logo').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Créer la prévisualisation ou la mettre à jour si elle existe déjà
+                let preview = document.getElementById('logo-preview');
+                if (!preview) {
+                    preview = document.createElement('div');
+                    preview.id = 'logo-preview';
+                    preview.className = 'mt-2';
+                    preview.innerHTML = '<p>Aperçu du logo:</p>';
+                    const img = document.createElement('img');
+                    img.style.maxHeight = '100px';
+                    img.style.maxWidth = '200px';
+                    img.alt = 'Aperçu du logo';
+                    preview.appendChild(img);
+                    document.getElementById('logo').parentNode.appendChild(preview);
+                }
+                // Mettre à jour l'image
+                preview.querySelector('img').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

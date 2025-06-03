@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Conditions d'Utilisation - TournoiPRO{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-12">
+      <!-- Fil d'ariane -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Conditions d'Utilisation</li>
+        </ol>
+      </nav>
+      
+      <!-- En-tête de page -->
+      <div class="mb-5">
+        <h1 class="mb-3 fw-bold">Conditions d'Utilisation</h1>
+        <p class="text-muted">Dernière mise à jour : {% now "j F Y" %}</p>
+      </div>
+      
+      <!-- Contenu -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h2 class="h4 mb-3">1. Acceptation des conditions</h2>
+          <p>Bienvenue sur TournoiPRO. En accédant à notre plateforme et en l'utilisant, vous acceptez d'être lié par les présentes Conditions d'Utilisation, notre Politique de Confidentialité, et toutes les lois et réglementations applicables. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre site.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">2. Description du service</h2>
+          <p>TournoiPRO est une plateforme en ligne qui permet aux utilisateurs de :</p>
+          <ul>
+            <li>Créer et gérer des tournois de football</li>
+            <li>Créer et gérer des équipes</li>
+            <li>S'inscrire à des tournois</li>
+            <li>Suivre les résultats et les statistiques des tournois</li>
+            <li>Communiquer avec d'autres utilisateurs de la plateforme</li>
+          </ul>
+          <p>Nous nous réservons le droit de modifier, suspendre ou interrompre tout aspect du service à tout moment, y compris la disponibilité de toute fonctionnalité, base de données ou contenu.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">3. Inscription et compte utilisateur</h2>
+          <p>Pour utiliser certaines fonctionnalités de TournoiPRO, vous devez créer un compte utilisateur. Lorsque vous vous inscrivez :</p>
+          <ul>
+            <li>Vous devez fournir des informations exactes, complètes et à jour</li>
+            <li>Vous êtes responsable de la confidentialité de votre mot de passe et de toutes les activités qui se produisent sous votre compte</li>
+            <li>Vous devez avoir au moins 16 ans pour créer un compte, ou avoir l'autorisation d'un parent ou tuteur légal</li>
+            <li>Vous acceptez de ne pas créer plus d'un compte personnel</li>
+          </ul>
+          <p>Nous nous réservons le droit de suspendre ou de résilier votre compte à notre seule discrétion, sans préavis, pour toute violation des présentes conditions.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">4. Utilisation du service</h2>
+          <p>En utilisant TournoiPRO, vous acceptez de :</p>
+          <ul>
+            <li>Respecter toutes les lois applicables et les réglementations</li>
+            <li>Ne pas utiliser le service à des fins illégales ou non autorisées</li>
+            <li>Ne pas tenter de perturber ou de compromettre la sécurité de notre plateforme</li>
+            <li>Ne pas diffuser de contenu offensant, diffamatoire, discriminatoire ou inapproprié</li>
+            <li>Ne pas usurper l'identité d'une autre personne</li>
+            <li>Ne pas utiliser la plateforme pour envoyer des messages non sollicités ou du spam</li>
+          </ul>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">5. Organisation des tournois</h2>
+          <p>Les organisateurs de tournois sont responsables de :</p>
+          <ul>
+            <li>Fournir des informations exactes sur leur tournoi</li>
+            <li>Assurer que leur tournoi respecte les lois et réglementations locales</li>
+            <li>Gérer les inscriptions, les matchs et les résultats de manière équitable</li>
+            <li>Communiquer clairement les règles et les modalités de participation</li>
+          </ul>
+          <p>TournoiPRO n'est pas responsable des actions des organisateurs de tournois ni de la bonne tenue des événements. Nous fournissons uniquement la plateforme technologique.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">6. Inscription aux tournois</h2>
+          <p>En vous inscrivant à un tournoi :</p>
+          <ul>
+            <li>Vous vous engagez à participer aux dates et heures indiquées</li>
+            <li>Vous acceptez les règles spécifiques établies par l'organisateur</li>
+            <li>Vous comprenez que des frais d'inscription peuvent s'appliquer et peuvent être non remboursables</li>
+          </ul>
+          <p>Votre inscription peut être annulée par l'organisateur si vous ne respectez pas les règles ou conditions du tournoi.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">7. Contenu utilisateur</h2>
+          <p>TournoiPRO permet aux utilisateurs de publier du contenu, tel que des photos, des commentaires et des informations de profil. En publiant du contenu sur TournoiPRO :</p>
+          <ul>
+            <li>Vous gardez tous vos droits de propriété intellectuelle sur ce contenu</li>
+            <li>Vous accordez à TournoiPRO une licence mondiale, non exclusive, libre de redevances pour utiliser, reproduire et afficher ce contenu</li>
+            <li>Vous déclarez être propriétaire ou avoir les droits nécessaires pour partager ce contenu</li>
+            <li>Vous acceptez que votre contenu puisse être visible par d'autres utilisateurs selon vos paramètres de confidentialité</li>
+          </ul>
+          <p>Nous nous réservons le droit de supprimer tout contenu qui viole nos conditions ou que nous jugeons inapproprié.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">8. Propriété intellectuelle</h2>
+          <p>Le service TournoiPRO et son contenu original (à l'exclusion du contenu fourni par les utilisateurs) sont la propriété de TournoiPRO et sont protégés par les lois françaises et internationales sur le droit d'auteur, les marques commerciales et autres droits de propriété intellectuelle.</p>
+          <p>Notre logo, notre nom et nos marques sont notre propriété exclusive et ne peuvent être utilisés sans notre autorisation écrite préalable.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">9. Limitation de responsabilité</h2>
+          <p>TournoiPRO est fourni "tel quel" et "selon disponibilité", sans garantie d'aucune sorte, expresse ou implicite. Nous ne garantissons pas que :</p>
+          <ul>
+            <li>Le service sera ininterrompu, opportun, sûr ou sans erreur</li>
+            <li>Les résultats obtenus de l'utilisation du service seront exacts ou fiables</li>
+            <li>La qualité de tout produit, service, information ou autre matériel obtenu par le biais du service répondra à vos attentes</li>
+          </ul>
+          <p>En aucun cas, TournoiPRO, ses directeurs, employés ou agents ne seront responsables de tout dommage direct, indirect, accessoire, spécial, consécutif ou punitif résultant de l'utilisation ou de l'impossibilité d'utiliser notre service.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">10. Indemnisation</h2>
+          <p>Vous acceptez de défendre, d'indemniser et de tenir TournoiPRO inoffensif contre toute réclamation, responsabilité, dommage, perte et dépense, y compris les frais juridiques, découlant de : (a) votre utilisation du service ; (b) toute violation de ces conditions ; (c) votre contenu ; ou (d) votre violation des droits d'un tiers.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">11. Modifications des conditions</h2>
+          <p>Nous nous réservons le droit de modifier ces conditions à tout moment. Nous vous informerons de tout changement en publiant les nouvelles conditions sur cette page et en mettant à jour la date de "dernière mise à jour". Il est de votre responsabilité de consulter régulièrement ces conditions.</p>
+          <p>Votre utilisation continue du service après la publication des conditions modifiées constitue votre acceptation de ces conditions.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">12. Loi applicable et juridiction</h2>
+          <p>Ces conditions sont régies et interprétées conformément aux lois françaises. Tout litige relatif à ces conditions sera soumis à la juridiction exclusive des tribunaux de Paris, France.</p>
+          
+          <hr class="my-4">
+          <h2 class="h4 mb-3">13. Contact</h2>
+          <p>Si vous avez des questions concernant ces conditions d'utilisation, veuillez nous contacter à l'adresse suivante :</p>
+          <address class="mb-0">
+            <strong>TournoiPRO</strong><br>
+            123 Rue du Sport<br>
+            75001 Paris, France<br>
+            Email: <a href="mailto:contact@tournoipro.com">contact@tournoipro.com</a><br>
+            Téléphone: +33 1 23 45 67 89
+          </address>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .card {
+    border-radius: 10px;
+    border: none;
+  }
+  
+  h1 {
+    color: #0c2461;
+  }
+  
+  h2 {
+    color: #1e3799;
+  }
+  
+  hr {
+    background-color: #eaeaea;
+    opacity: 0.7;
+  }
+  
+  .breadcrumb {
+    background-color: transparent;
+    padding: 0;
+  }
+  
+  .breadcrumb-item a {
+    color: #4a69bd;
+    text-decoration: none;
+  }
+  
+  .breadcrumb-item a:hover {
+    color: #0c2461;
+    text-decoration: underline;
+  }
+  
+  .breadcrumb-item.active {
+    color: #718096;
+  }
+</style>
+{% endblock %} 

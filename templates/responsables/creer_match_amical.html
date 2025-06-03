@@ -1,0 +1,946 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Créer un Match Amical | TournoiPRO{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- En-tête de page amélioré -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-handshake header-icon"></i>
+                    Créer un Match Amical
+                </h1>
+                <nav aria-label="breadcrumb" class="custom-breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'responsables:tableau_bord' %}">Tableau de bord</a></li>
+                        <li class="breadcrumb-item active">Créer un match amical</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-outline-primary btn-icon">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages d'alerte -->
+    {% if messages %}
+        <div class="alerts-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show custom-alert" role="alert">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Formulaire amélioré -->
+            <div class="card card-form shadow">
+                <div class="card-header bg-gradient">
+                    <h5 class="card-title">
+                        <i class="fas fa-calendar-plus me-2"></i>Détails du match
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'responsables:creer_match_amical' %}" id="matchForm">
+                        {% csrf_token %}
+                        
+                        <!-- Étapes visuelles -->
+                        <div class="form-steps mb-4">
+                            <div class="step active" id="step-teams">
+                                <div class="step-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <span class="step-label">Équipes</span>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step" id="step-details">
+                                <div class="step-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <span class="step-label">Détails</span>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step" id="step-confirm">
+                                <div class="step-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="step-label">Confirmation</span>
+                            </div>
+                        </div>
+
+                        <!-- Étape 1: Sélection des équipes -->
+                        <div class="form-step active" id="teams-step">
+                            <div class="mb-4">
+                                <label for="equipe_responsable" class="form-label">Votre équipe</label>
+                                <div class="team-card selected">
+                                    <div class="team-icon">
+                                        {% if equipe_responsable.logo %}
+                                            <img src="{{ equipe_responsable.logo.url }}" alt="{{ equipe_responsable.nom }}">
+                                        {% else %}
+                                            <i class="fas fa-shield-alt"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="team-info">
+                                        <h6 class="team-name">{{ equipe_responsable.nom }}</h6>
+                                        <span class="team-role badge bg-primary">Votre équipe</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="equipe_domicile" value="{{ equipe_responsable.id }}">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="equipe_adverse" class="form-label">Choisissez l'équipe adverse</label>
+                                <select class="form-select select2" id="equipe_adverse" name="equipe_adverse" required>
+                                    <option value="">Sélectionnez une équipe...</option>
+                                    {% for equipe in equipes_adverses %}
+                                    <option value="{{ equipe.id }}" data-logo="{% if equipe.logo %}{{ equipe.logo.url }}{% endif %}">{{ equipe.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <div id="selected-team-preview" class="mt-3 d-none">
+                                    <div class="team-card">
+                                        <div class="team-icon" id="team-preview-icon">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="team-info">
+                                            <h6 class="team-name" id="team-preview-name"></h6>
+                                            <span class="team-role badge bg-secondary">Équipe adverse</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="match-preview mb-4 d-none" id="match-preview">
+                                <div class="match-vs">
+                                    <div class="team team-a">
+                                        <div class="team-logo">
+                                            {% if equipe_responsable.logo %}
+                                                <img src="{{ equipe_responsable.logo.url }}" alt="{{ equipe_responsable.nom }}">
+                                            {% else %}
+                                                <i class="fas fa-shield-alt"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="team-name">{{ equipe_responsable.nom }}</div>
+                                    </div>
+                                    <div class="vs-badge">VS</div>
+                                    <div class="team team-b">
+                                        <div class="team-logo" id="preview-team-b-logo">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="team-name" id="preview-team-b-name"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-navigation text-end">
+                                <button type="button" class="btn btn-primary" id="to-details-btn" disabled>
+                                    Continuer <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Étape 2: Détails du match -->
+                        <div class="form-step" id="details-step">
+                            <div class="row">
+                                <div class="col-md-7 mb-3">
+                                    <label for="date" class="form-label">Date et heure du match</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        <input type="datetime-local" class="form-control" id="date" name="date" value="{{ now }}" min="{{ now }}" required>
+                                    </div>
+                                    <div class="form-text">Choisissez quand aura lieu le match amical.</div>
+                                </div>
+                                
+                                <div class="col-md-5 mb-3">
+                                    <label class="form-label">Domicile ou extérieur?</label>
+                                    <div class="venue-options">
+                                        <div class="form-check venue-option">
+                                            <input class="form-check-input" type="radio" name="domicile_exterieur" id="venue-home" value="domicile" checked>
+                                            <label class="form-check-label" for="venue-home">
+                                                <i class="fas fa-home"></i> Domicile
+                                            </label>
+                                        </div>
+                                        <div class="form-check venue-option">
+                                            <input class="form-check-input" type="radio" name="domicile_exterieur" id="venue-away" value="exterieur">
+                                            <label class="form-check-label" for="venue-away">
+                                                <i class="fas fa-bus"></i> Extérieur
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="lieu" class="form-label">Lieu du match</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                    <input type="text" class="form-control" id="lieu" name="lieu" placeholder="Ex: Stade municipal, Gymnase central...">
+                                </div>
+                                <div class="form-text">Précisez où se déroulera le match (facultatif).</div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="notes" class="form-label">Notes supplémentaires</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Informations complémentaires, consignes particulières..."></textarea>
+                                <div class="form-text">Ajoutez des notes ou instructions spécifiques (facultatif).</div>
+                            </div>
+
+                            <div class="form-navigation d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" id="back-to-teams-btn">
+                                    <i class="fas fa-arrow-left me-2"></i> Retour
+                                </button>
+                                <button type="button" class="btn btn-primary" id="to-confirm-btn">
+                                    Continuer <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Étape 3: Confirmation -->
+                        <div class="form-step" id="confirm-step">
+                            <div class="confirmation-box">
+                                <h5 class="mb-3">Récapitulatif du match</h5>
+                                
+                                <div class="match-vs match-confirm">
+                                    <div class="team team-a">
+                                        <div class="team-logo">
+                                            {% if equipe_responsable.logo %}
+                                                <img src="{{ equipe_responsable.logo.url }}" alt="{{ equipe_responsable.nom }}">
+                                            {% else %}
+                                                <i class="fas fa-shield-alt"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="team-name">{{ equipe_responsable.nom }}</div>
+                                    </div>
+                                    <div class="vs-badge">VS</div>
+                                    <div class="team team-b">
+                                        <div class="team-logo" id="confirm-team-b-logo">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="team-name" id="confirm-team-b-name"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="confirmation-details mt-4">
+                                    <div class="detail-item">
+                                        <i class="fas fa-calendar-day"></i>
+                                        <span id="confirm-date">--/--/---- --:--</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span id="confirm-lieu">Lieu à définir</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-home"></i>
+                                        <span id="confirm-venue">Domicile</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    En créant ce match amical, une invitation sera envoyée à l'équipe adverse pour confirmer sa participation.
+                                </div>
+                            </div>
+                            
+                            <div class="form-navigation d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary" id="back-to-details-btn">
+                                    <i class="fas fa-arrow-left me-2"></i> Retour
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-calendar-check me-2"></i>Créer le match amical
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Panneau d'informations -->
+            <div class="card info-card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>À propos des matchs amicaux
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="info-content">
+                            <h6>Rencontres hors compétition</h6>
+                            <p>Les matchs amicaux vous permettent d'organiser des rencontres entre équipes sans l'enjeu d'un tournoi.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="info-content">
+                            <h6>Planification flexible</h6>
+                            <p>Organisez des matchs quand vous le souhaitez, sans contraintes liées à un calendrier de tournoi.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="info-content">
+                            <h6>Suivi des statistiques</h6>
+                            <p>Les statistiques des matchs amicaux sont enregistrées mais ne sont pas comptabilisées dans les tournois.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="info-content">
+                            <h6>Notifications automatiques</h6>
+                            <p>Les deux équipes seront notifiées de la création du match et de tout changement ultérieur.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles généraux et variables */
+    :root {
+        --primary-color: #007bff;
+        --primary-color-dark: #0056b3;
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --info-color: #17a2b8;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --white-color: #ffffff;
+        --border-radius: 8px;
+        --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    /* En-tête amélioré */
+    .page-header {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+        font-weight: 700;
+    }
+
+    .header-icon {
+        font-size: 1.4rem;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    }
+
+    .custom-breadcrumb {
+        margin-bottom: 0;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+        color: var(--secondary-color);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-icon {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Cartes stylisées */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+    }
+
+    .card-form:hover, .info-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: none;
+        background-color: white;
+        font-weight: 600;
+    }
+
+    .bg-gradient {
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+        color: white;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Étapes du formulaire */
+    .form-steps {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--light-color);
+        color: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        border: 2px solid var(--secondary-color);
+        transition: var(--transition);
+    }
+
+    .step.active .step-icon {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.25);
+    }
+
+    .step.completed .step-icon {
+        background-color: var(--success-color);
+        color: white;
+        border-color: var(--success-color);
+    }
+
+    .step-label {
+        font-size: 14px;
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+
+    .step.active .step-label {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .step-line {
+        flex-grow: 1;
+        height: 2px;
+        background-color: var(--secondary-color);
+        opacity: 0.3;
+        margin: 0 10px;
+        position: relative;
+        top: -25px;
+    }
+
+    /* Étapes du formulaire */
+    .form-step {
+        display: none;
+    }
+
+    .form-step.active {
+        display: block;
+    }
+
+    /* Cartes d'équipes */
+    .team-card {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--border-radius);
+        margin-top: 10px;
+        transition: var(--transition);
+    }
+
+    .team-card.selected, .team-card:hover {
+        border-color: var(--primary-color);
+        background-color: rgba(0, 123, 255, 0.05);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+    }
+
+    .team-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: #888;
+        font-size: 1.5rem;
+        overflow: hidden;
+    }
+
+    .team-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .team-info {
+        flex: 1;
+    }
+
+    .team-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    /* Match preview */
+    .match-preview {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        background-color: rgba(0, 123, 255, 0.05);
+        border: 1px solid rgba(0, 123, 255, 0.1);
+    }
+
+    .match-vs {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        text-align: center;
+    }
+
+    .match-confirm {
+        padding: 1.5rem;
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        border-radius: var(--border-radius);
+    }
+
+    .team {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+
+    .team-logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: #666;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 3px solid #fff;
+        margin-bottom: 10px;
+    }
+
+    .team-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .vs-badge {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin: 0 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Options de lieu */
+    .venue-options {
+        display: flex;
+        gap: 15px;
+    }
+
+    .venue-option {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .venue-option:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .venue-option input:checked + label {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .venue-option label {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .venue-option label i {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    /* Confirmation */
+    .confirmation-box {
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: var(--border-radius);
+        border: 1px dashed #dee2e6;
+    }
+
+    .confirmation-details {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .detail-item i {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: rgba(0, 123, 255, 0.1);
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Navigation entre étapes */
+    .form-navigation {
+        margin-top: 1.5rem;
+    }
+
+    /* Panel d'information */
+    .info-card .card-header {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
+    .info-item {
+        display: flex;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(23, 162, 184, 0.1);
+        color: var(--info-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .info-content h6 {
+        margin-bottom: 5px;
+        color: var(--dark-color);
+    }
+
+    .info-content p {
+        color: var(--secondary-color);
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+
+    /* Styles pour les alertes */
+    .alerts-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .custom-alert {
+        border-radius: var(--border-radius);
+        border: none;
+    }
+
+    /* Améliorations pour la sélection des équipes */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border-radius: var(--border-radius);
+        border: 1px solid #ced4da;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+        .page-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .header-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .venue-options {
+            flex-direction: row;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .step-label {
+            font-size: 12px;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .match-vs {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .vs-badge {
+            margin: 10px 0;
+        }
+
+        .form-navigation {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-navigation button {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables des étapes
+    const teamsStep = document.getElementById('teams-step');
+    const detailsStep = document.getElementById('details-step');
+    const confirmStep = document.getElementById('confirm-step');
+    
+    // Icônes d'étapes
+    const teamsStepIcon = document.getElementById('step-teams');
+    const detailsStepIcon = document.getElementById('step-details');
+    const confirmStepIcon = document.getElementById('step-confirm');
+    
+    // Boutons de navigation
+    const toDetailsBtn = document.getElementById('to-details-btn');
+    const backToTeamsBtn = document.getElementById('back-to-teams-btn');
+    const toConfirmBtn = document.getElementById('to-confirm-btn');
+    const backToDetailsBtn = document.getElementById('back-to-details-btn');
+    
+    // Afficher l'aperçu de l'équipe sélectionnée
+    const equipeAdverseSelect = document.getElementById('equipe_adverse');
+    const selectedTeamPreview = document.getElementById('selected-team-preview');
+    const teamPreviewName = document.getElementById('team-preview-name');
+    const teamPreviewIcon = document.getElementById('team-preview-icon');
+    
+    // Aperçu du match
+    const matchPreview = document.getElementById('match-preview');
+    const previewTeamBName = document.getElementById('preview-team-b-name');
+    const previewTeamBLogo = document.getElementById('preview-team-b-logo');
+    
+    // Confirmation
+    const confirmTeamBName = document.getElementById('confirm-team-b-name');
+    const confirmTeamBLogo = document.getElementById('confirm-team-b-logo');
+    const confirmDate = document.getElementById('confirm-date');
+    const confirmLieu = document.getElementById('confirm-lieu');
+    const confirmVenue = document.getElementById('confirm-venue');
+    
+    // Navigation entre les étapes
+    toDetailsBtn.addEventListener('click', function() {
+        teamsStep.classList.remove('active');
+        detailsStep.classList.add('active');
+        
+        teamsStepIcon.classList.add('completed');
+        detailsStepIcon.classList.add('active');
+    });
+    
+    backToTeamsBtn.addEventListener('click', function() {
+        detailsStep.classList.remove('active');
+        teamsStep.classList.add('active');
+        
+        detailsStepIcon.classList.remove('active');
+        teamsStepIcon.classList.remove('completed');
+        teamsStepIcon.classList.add('active');
+    });
+    
+    toConfirmBtn.addEventListener('click', function() {
+        // Mettre à jour les informations de confirmation
+        const dateInput = document.getElementById('date');
+        const lieuInput = document.getElementById('lieu');
+        const venueHome = document.getElementById('venue-home');
+        
+        // Formater la date pour l'affichage
+        const dateObj = new Date(dateInput.value);
+        const formattedDate = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        confirmDate.textContent = formattedDate;
+        confirmLieu.textContent = lieuInput.value || 'Lieu à définir';
+        confirmVenue.textContent = venueHome.checked ? 'Domicile' : 'Extérieur';
+        
+        detailsStep.classList.remove('active');
+        confirmStep.classList.add('active');
+        
+        detailsStepIcon.classList.add('completed');
+        detailsStepIcon.classList.remove('active');
+        confirmStepIcon.classList.add('active');
+    });
+    
+    backToDetailsBtn.addEventListener('click', function() {
+        confirmStep.classList.remove('active');
+        detailsStep.classList.add('active');
+        
+        confirmStepIcon.classList.remove('active');
+        detailsStepIcon.classList.remove('completed');
+        detailsStepIcon.classList.add('active');
+    });
+    
+    // Gérer la sélection d'équipe adverse
+    equipeAdverseSelect.addEventListener('change', function() {
+        if (this.value) {
+            const selectedOption = this.options[this.selectedIndex];
+            const teamName = selectedOption.text;
+            const teamLogo = selectedOption.getAttribute('data-logo');
+            
+            // Activer le bouton Continuer
+            toDetailsBtn.disabled = false;
+            
+            // Afficher l'aperçu de l'équipe
+            selectedTeamPreview.classList.remove('d-none');
+            teamPreviewName.textContent = teamName;
+            
+            if (teamLogo) {
+                teamPreviewIcon.innerHTML = `<img src="${teamLogo}" alt="${teamName}">`;
+                previewTeamBLogo.innerHTML = `<img src="${teamLogo}" alt="${teamName}">`;
+                confirmTeamBLogo.innerHTML = `<img src="${teamLogo}" alt="${teamName}">`;
+            } else {
+                teamPreviewIcon.innerHTML = '<i class="fas fa-shield-alt"></i>';
+                previewTeamBLogo.innerHTML = '<i class="fas fa-shield-alt"></i>';
+                confirmTeamBLogo.innerHTML = '<i class="fas fa-shield-alt"></i>';
+            }
+            
+            // Afficher l'aperçu du match
+            matchPreview.classList.remove('d-none');
+            previewTeamBName.textContent = teamName;
+            
+            // Mettre à jour l'aperçu de confirmation
+            confirmTeamBName.textContent = teamName;
+        } else {
+            selectedTeamPreview.classList.add('d-none');
+            matchPreview.classList.add('d-none');
+            toDetailsBtn.disabled = true;
+        }
+    });
+    
+    // Options de lieu (domicile/extérieur)
+    const venueOptions = document.querySelectorAll('.venue-option');
+    venueOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const input = this.querySelector('input');
+            input.checked = true;
+        });
+    });
+    
+    // Initialiser Select2 si disponible
+    if (typeof $.fn.select2 !== 'undefined') {
+        $('.select2').select2({
+            placeholder: "Sélectionnez une équipe...",
+            allowClear: true
+        });
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Connexion - TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+  --primary-color: #4361ee;
+  --primary-light: #7a97ff;
+  --primary-dark: #3a56d4;
+  --accent-color: #ff7d44;
+  --success-color: #06d6a0;
+  --warning-color: #ffd166;
+  --danger-color: #ef476f;
+  --text-color: #2b2d42;
+  --text-muted: #6c757d;
+  --light-color: #f8f9fa;
+  --light-gray: #e9ecef;
+  --border-radius: 12px;
+  --input-radius: 8px;
+}
+
+body {
+  background: #ffffff;
+}
+
+.login-container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.login-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.login-header {
+  background: var(--primary-color);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.login-logo {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-logo i {
+  margin-top: 2px;
+}
+
+.login-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.login-body {
+  padding: 1.5rem;
+}
+
+.form-control {
+  height: 44px;
+  border: 1px solid var(--light-gray);
+  border-radius: var(--input-radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.form-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.login-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  height: 44px;
+  border-radius: var(--input-radius);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.login-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.login-footer {
+  padding: 1rem 1.5rem;
+  background: var(--light-color);
+  text-align: center;
+  border-top: 1px solid var(--light-gray);
+}
+
+.login-footer p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.login-footer a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+
+.forgot-password {
+  text-align: right;
+}
+
+.forgot-password a {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  color: var(--primary-color);
+}
+
+.form-check-input {
+  width: 16px;
+  height: 16px;
+  margin-top: 0;
+}
+
+.social-login {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.social-divider {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.social-divider::before,
+.social-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.social-divider::before {
+  margin-right: .5em;
+}
+
+.social-divider::after {
+  margin-left: .5em;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.social-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+}
+
+.social-button:hover {
+  transform: translateY(-2px);
+}
+
+.facebook {
+  background: #3b5998;
+}
+
+.google {
+  background: #db4437;
+}
+
+.twitter {
+  background: #1da1f2;
+}
+
+.alert {
+  border-radius: var(--input-radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  border: none;
+}
+
+.alert-danger {
+  background-color: rgba(239, 71, 111, 0.1);
+  color: var(--danger-color);
+  border-left: 3px solid var(--danger-color);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <h1 class="login-title">Bienvenue sur TournoiPRO</h1>
+        <p class="login-subtitle">Connectez-vous pour accéder à votre compte</p>
+      </div>
+      
+      <div class="login-body">
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Identifiant ou mot de passe incorrect. Veuillez réessayer.
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="id_username" class="form-label">Nom d'utilisateur</label>
+            <input type="text" name="username" id="id_username" class="form-control" placeholder="Votre nom d'utilisateur" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="id_password" class="form-label">Mot de passe</label>
+            <input type="password" name="password" id="id_password" class="form-control" placeholder="Votre mot de passe" required>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+              <input type="checkbox" name="remember_me" id="id_remember_me" class="form-check-input">
+              <label class="form-check-label remember-me" for="id_remember_me">Se souvenir de moi</label>
+            </div>
+            <div class="forgot-password">
+              <a href="{% url 'password_reset' %}">Mot de passe oublié ?</a>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn login-button">
+            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+          </button>
+          
+          <div class="social-login">
+            <div class="social-divider">ou connectez-vous avec</div>
+            <div class="social-buttons">
+              <a href="#" class="social-button facebook">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="#" class="social-button google">
+                <i class="fab fa-google"></i>
+              </a>
+              <a href="#" class="social-button twitter">
+                <i class="fab fa-twitter"></i>
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="login-footer">
+        <p>Vous n'avez pas de compte ? <a href="{% url 'accounts:register' %}">Inscrivez-vous</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

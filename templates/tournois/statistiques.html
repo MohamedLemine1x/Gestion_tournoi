@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistiques - {{ tournoi.nom }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- En-tête de la page -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-chart-line me-3" style="font-size: 2rem;"></i>
+                <h3 class="mb-0">Statistiques - {{ tournoi.nom }}</h3>
+            </div>
+            <a href="{% url 'tournois:detail' tournoi.id %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Retour au tournoi
+            </a>
+        </div>
+        <div class="card-body">
+            <p class="lead">
+                {% if tournoi.date_fin %}
+                    Statistiques du tournoi du {{ tournoi.date_debut|date:"d/m/Y" }} au {{ tournoi.date_fin|date:"d/m/Y" }}
+                {% else %}
+                    Statistiques du tournoi du {{ tournoi.date_debut|date:"d/m/Y" }}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if nb_matchs_joues > 0 %}
+    <!-- Statistiques générales -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-futbol me-2 text-primary"></i>
+                        Statistiques générales du tournoi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-primary-light">
+                                    <i class="fas fa-calendar-check text-primary"></i>
+                                </div>
+                                <div class="stat-value">{{ nb_matchs_joues }}</div>
+                                <div class="stat-label">Matchs joués</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-success-light">
+                                    <i class="fas fa-futbol text-success"></i>
+                                </div>
+                                <div class="stat-value">{{ total_buts }}</div>
+                                <div class="stat-label">Buts marqués</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-info-light">
+                                    <i class="fas fa-chart-bar text-info"></i>
+                                </div>
+                                <div class="stat-value">{{ moyenne_buts|floatformat:1 }}</div>
+                                <div class="stat-label">Moyenne de buts par match</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meilleures équipes -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4 mb-md-0">
+            {% if meilleure_attaque %}
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Meilleure attaque
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="best-team-icon mb-3">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4 class="best-team-name">{{ meilleure_attaque.equipe.nom }}</h4>
+                    <div class="best-team-stats mt-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="stat-value text-success">{{ meilleure_attaque.buts_marques }}</div>
+                                <div class="stat-label">Buts marqués</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-value text-muted">{{ meilleure_attaque.buts_marques|divisibleby:nb_matchs_joues|floatformat:1 }}</div>
+                                <div class="stat-label">Moyenne/match</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            {% if meilleure_defense %}
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Meilleure défense
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="best-team-icon mb-3">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4 class="best-team-name">{{ meilleure_defense.equipe.nom }}</h4>
+                    <div class="best-team-stats mt-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="stat-value text-danger">{{ meilleure_defense.buts_encaisses }}</div>
+                                <div class="stat-label">Buts encaissés</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-value text-muted">{{ meilleure_defense.buts_encaisses|divisibleby:nb_matchs_joues|floatformat:1 }}</div>
+                                <div class="stat-label">Moyenne/match</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistiques par équipe -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-list-ol me-2 text-primary"></i>
+                Statistiques par équipe
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Équipe</th>
+                            <th class="text-center">Buts marqués</th>
+                            <th class="text-center">Buts encaissés</th>
+                            <th class="text-center">Différence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for equipe_stat in equipes_stats %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="team-icon me-2">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <span class="team-name">{{ equipe_stat.equipe.nom }}</span>
+                                </div>
+                            </td>
+                            <td class="text-center text-success">{{ equipe_stat.buts_marques }}</td>
+                            <td class="text-center text-danger">{{ equipe_stat.buts_encaisses }}</td>
+                            <td class="text-center {% if equipe_stat.buts_marques > equipe_stat.buts_encaisses %}text-success{% elif equipe_stat.buts_marques < equipe_stat.buts_encaisses %}text-danger{% endif %}">
+                                {{ equipe_stat.buts_marques|add:"-"|add:equipe_stat.buts_encaisses }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="empty-state text-center py-5">
+                <div class="empty-icon mb-3">
+                    <i class="fas fa-chart-line" style="font-size: 4rem; opacity: 0.2;"></i>
+                </div>
+                <h4 class="text-muted">Aucune statistique disponible</h4>
+                <p class="text-muted mb-4">Les statistiques seront disponibles dès que des matchs auront été joués.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'tournois:planifier_matchs' tournoi.id %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-check me-2"></i>Planifier des matchs
+                    </a>
+                    <a href="{% url 'tournois:classement' tournoi.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-medal me-2"></i>Voir le classement
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Styles pour les cartes de statistiques */
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        font-size: 1.8rem;
+    }
+    
+    .bg-primary-light { background-color: rgba(0, 123, 255, 0.1); }
+    .bg-success-light { background-color: rgba(40, 167, 69, 0.1); }
+    .bg-info-light { background-color: rgba(23, 162, 184, 0.1); }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: #343a40;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* Styles pour les meilleures équipes */
+    .best-team-icon {
+        width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto;
+        font-size: 2.5rem;
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+    }
+    
+    .best-team-name {
+        font-weight: 700;
+        color: #343a40;
+        margin-top: 15px;
+    }
+    
+    .best-team-stats {
+        margin-top: 20px;
+    }
+    
+    /* Styles pour les équipes */
+    .team-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+    }
+    
+    .team-name {
+        font-weight: 600;
+    }
+    
+    /* Styles pour l'état vide */
+    .empty-state {
+        padding: 40px 20px;
+    }
+    
+    .empty-icon {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord organisateur{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+    
+    .dashboard-card-header {
+        padding: 20px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+    
+    .dashboard-card-body {
+        padding: 20px;
+    }
+    
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+    
+    .bg-primary-light {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+    
+    .bg-success-light {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    
+    .bg-warning-light {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    
+    .bg-info-light {
+        background-color: rgba(23, 162, 184, 0.1);
+    }
+    
+    .text-primary {
+        color: #007bff !important;
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+    }
+    
+    .text-warning {
+        color: #ffc107 !important;
+    }
+    
+    .text-info {
+        color: #17a2b8 !important;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: #6c757d;
+    }
+    
+    .tournament-item {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: white;
+        transition: all 0.2s ease;
+    }
+    
+    .tournament-item:hover {
+        background-color: #f8f9fa;
+        border-color: rgba(0,123,255,0.3);
+    }
+    
+    .tournament-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .tournament-date {
+        font-size: 13px;
+        color: #6c757d;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Tableau de bord organisateur</h1>
+        <a href="{% url 'organisateurs:tournoi_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i> Créer un tournoi
+        </a>
+    </div>
+    
+    <!-- Statistiques -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-light">
+                    <i class="fas fa-trophy text-primary"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ tournois|length }}</div>
+                    <div class="stat-label">Tournois organisés</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-success-light">
+                    <i class="fas fa-tasks text-success"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ matchs_a_planifier|length }}</div>
+                    <div class="stat-label">Matchs à planifier</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-light">
+                    <i class="fas fa-calendar-alt text-warning"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ matchs_a_arbitrer|length }}</div>
+                    <div class="stat-label">Matchs à arbitrer</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <!-- Tournois -->
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2 text-primary"></i>
+                        Mes tournois
+                    </h5>
+                </div>
+                <div class="dashboard-card-body">
+                    {% if tournois %}
+                        {% for tournoi in tournois %}
+                            <div class="tournament-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="tournament-name">{{ tournoi.nom }}</div>
+                                        <div class="tournament-date">
+                                            <i class="fas fa-calendar-day me-1"></i> 
+                                            {{ tournoi.date_debut|date:"d/m/Y" }}
+                                            {% if tournoi.date_fin %}
+                                                - {{ tournoi.date_fin|date:"d/m/Y" }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="badge {% if tournoi.est_termine %}bg-secondary{% elif tournoi.est_en_cours %}bg-success{% else %}bg-primary{% endif %}">
+                                                {% if tournoi.est_termine %}Terminé{% elif tournoi.est_en_cours %}En cours{% else %}À venir{% endif %}
+                                            </span>
+                                            <span class="badge bg-info ms-1">{{ tournoi.inscriptions.count }} équipes</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'tournois:detail' tournoi.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'organisateurs:tournoi_edit' tournoi.id %}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <h5>Aucun tournoi organisé</h5>
+                            <p class="mb-3">Vous n'avez pas encore créé de tournoi.</p>
+                            <a href="{% url 'organisateurs:tournoi_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i> Créer un tournoi
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Matchs à planifier -->
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <div class="dashboard-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks me-2 text-success"></i>
+                        Matchs à planifier
+                    </h5>
+                </div>
+                <div class="dashboard-card-body">
+                    {% if matchs_a_planifier %}
+                        {% for match in matchs_a_planifier %}
+                            <div class="tournament-item">
+                                <div class="tournament-name">
+                                    {{ match.equipe_domicile.nom }} vs {{ match.equipe_exterieur.nom }}
+                                </div>
+                                <div class="tournament-date">
+                                    <i class="fas fa-calendar-day me-1"></i> À planifier
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{% url 'organisateurs:match_edit' match.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-calendar-plus me-1"></i> Planifier
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <h5>Aucun match à planifier</h5>
+                            <p>Tous vos matchs sont planifiés.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Matchs à arbitrer -->
+            <div class="dashboard-card mt-4">
+                <div class="dashboard-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-whistle me-2 text-warning"></i>
+                        Matchs à arbitrer
+                    </h5>
+                </div>
+                <div class="dashboard-card-body">
+                    {% if matchs_a_arbitrer %}
+                        {% for match in matchs_a_arbitrer %}
+                            <div class="tournament-item">
+                                <div class="tournament-name">
+                                    {{ match.equipe_domicile.nom }} vs {{ match.equipe_exterieur.nom }}
+                                </div>
+                                <div class="tournament-date">
+                                    <i class="fas fa-calendar-day me-1"></i> {{ match.date_match|date:"d/m/Y H:i" }}
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{% url 'organisateurs:resultat_match' match.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-clipboard-list me-1"></i> Saisir le résultat
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <h5>Aucun match à arbitrer</h5>
+                            <p>Tous vos matchs ont des résultats enregistrés.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

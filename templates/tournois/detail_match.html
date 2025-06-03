@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Détails du match - TournoiPRO{% endblock %}
+
+{% block content %}
+<section class="py-4">
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'tournois:liste' %}">Tournois</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'tournois:detail' tournoi.id %}">{{ tournoi.nom }}</a></li>
+        <li class="breadcrumb-item active">Détails du match</li>
+      </ol>
+    </nav>
+
+    <!-- Affichage des messages (succès, erreurs, etc.) -->
+    {% if messages %}
+    <div id="alert-container" class="mb-4">
+      {% for message in messages %}
+      <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show shadow-sm" 
+           role="alert">
+        <div class="d-flex align-items-center">
+          <div class="me-3 fs-4">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+          </div>
+          <div>{{ message }}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+              <i class="fas fa-futbol me-2"></i>Détails du match
+            </h4>
+            {% if peut_modifier and not match_termine %}
+            <div>
+              <a href="{% url 'tournois:enregistrer_resultat' match.id %}" class="btn btn-light btn-sm">
+                <i class="fas fa-edit me-1"></i>Enregistrer le résultat
+              </a>
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="card-body p-4">
+            <!-- Match info -->
+            <div class="match-details text-center mb-4">
+              <div class="row align-items-center">
+                <div class="col-4">
+                  <div class="team-info">
+                    <h5 class="team-name">{{ match.equipe_domicile.nom }}</h5>
+                    {% if match.equipe_domicile.logo %}
+                    <img src="{{ match.equipe_domicile.logo.url }}" alt="{{ match.equipe_domicile.nom }}" class="team-logo mb-2" style="max-height: 80px;">
+                    {% else %}
+                    <div class="team-placeholder mb-2 d-flex justify-content-center">
+                      <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <span class="display-6 text-primary">{{ match.equipe_domicile.nom|slice:":1" }}</span>
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                <div class="col-4">
+                  {% if match_termine %}
+                  <div class="score-display">
+                    <div class="score">{{ match.score_domicile }} - {{ match.score_exterieur }}</div>
+                    <div class="match-status text-success">
+                      <i class="fas fa-check-circle me-1"></i>Terminé
+                    </div>
+                  </div>
+                  {% else %}
+                  <div class="match-status">
+                    <span class="badge bg-warning text-dark mb-2">À venir</span>
+                    <div class="match-date">
+                      {% if match.date_match %}
+                      <i class="far fa-calendar-alt me-1"></i>{{ match.date_match|date:"j F Y" }}<br>
+                      <i class="far fa-clock me-1"></i>{{ match.date_match|date:"H:i" }}
+                      {% else %}
+                      <span class="text-muted">Date non définie</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-4">
+                  <div class="team-info">
+                    <h5 class="team-name">{{ match.equipe_exterieur.nom }}</h5>
+                    {% if match.equipe_exterieur.logo %}
+                    <img src="{{ match.equipe_exterieur.logo.url }}" alt="{{ match.equipe_exterieur.nom }}" class="team-logo mb-2" style="max-height: 80px;">
+                    {% else %}
+                    <div class="team-placeholder mb-2 d-flex justify-content-center">
+                      <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <span class="display-6 text-primary">{{ match.equipe_exterieur.nom|slice:":1" }}</span>
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Match details -->
+            <div class="row">
+              <div class="col-md-6">
+                <div class="match-info-card mb-3">
+                  <h6 class="text-muted mb-2"><i class="fas fa-info-circle me-1"></i>Informations</h6>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>Tournoi</span>
+                      <span class="fw-bold">{{ tournoi.nom }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>Statut</span>
+                      <span class="fw-bold">
+                        {% if match_termine %}
+                        <span class="text-success">Terminé</span>
+                        {% else %}
+                        <span class="text-warning">À venir</span>
+                        {% endif %}
+                      </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>Lieu</span>
+                      <span class="fw-bold">
+                        {% if match.lieu_match %}{{ match.lieu_match }}{% else %}{{ tournoi.lieu|default:"Non défini" }}{% endif %}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="match-info-card mb-3">
+                  <h6 class="text-muted mb-2"><i class="fas fa-calendar-alt me-1"></i>Programme</h6>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>Date</span>
+                      <span class="fw-bold">
+                        {% if match.date_match %}
+                        {{ match.date_match|date:"j F Y" }}
+                        {% else %}
+                        Non définie
+                        {% endif %}
+                      </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>Heure</span>
+                      <span class="fw-bold">
+                        {% if match.date_match %}
+                        {{ match.date_match|date:"H:i" }}
+                        {% else %}
+                        Non définie
+                        {% endif %}
+                      </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>Durée estimée</span>
+                      <span class="fw-bold">90 minutes</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            {% if match_termine %}
+            <!-- Résultats du match -->
+            <div class="mt-4">
+              <h5 class="border-bottom pb-2 mb-3">Résultat du match</h5>
+              <div class="result-summary text-center py-3 bg-light rounded">
+                <h4 class="mb-3">{{ match.equipe_domicile.nom }} {{ match.score_domicile }} - {{ match.score_exterieur }} {{ match.equipe_exterieur.nom }}</h4>
+                <div class="result-status">
+                  {% if match.score_domicile > match.score_exterieur %}
+                  <span class="badge bg-success">Victoire de {{ match.equipe_domicile.nom }}</span>
+                  {% elif match.score_exterieur > match.score_domicile %}
+                  <span class="badge bg-success">Victoire de {{ match.equipe_exterieur.nom }}</span>
+                  {% else %}
+                  <span class="badge bg-secondary">Match nul</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4">
+        <!-- Actions sidebar -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">
+              <i class="fas fa-cog me-2"></i>Actions
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="list-group">
+              <a href="{% url 'tournois:detail' tournoi.id %}" class="list-group-item list-group-item-action">
+                <i class="fas fa-arrow-left me-2"></i>Retour au tournoi
+              </a>
+              <a href="{% url 'tournois:resultats' tournoi.id %}" class="list-group-item list-group-item-action">
+                <i class="fas fa-trophy me-2"></i>Voir tous les résultats
+              </a>
+              <a href="{% url 'tournois:planifier_matchs' tournoi.id %}" class="list-group-item list-group-item-action">
+                <i class="fas fa-calendar-alt me-2"></i>Planifier des matchs
+              </a>
+              {% if peut_modifier %}
+                {% if not match_termine %}
+                <a href="{% url 'tournois:enregistrer_resultat' match.id %}" class="list-group-item list-group-item-action list-group-item-primary">
+                  <i class="fas fa-edit me-2"></i>Enregistrer le résultat
+                </a>
+                <a href="{% url 'tournois:supprimer_match' match.id %}" class="list-group-item list-group-item-action list-group-item-danger"
+                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce match ?')">
+                  <i class="fas fa-trash-alt me-2"></i>Supprimer le match
+                </a>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Teams info -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+              <i class="fas fa-users me-2"></i>Équipes
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">{{ match.equipe_domicile.nom }}</h6>
+                    <small class="text-muted">Équipe domicile</small>
+                  </div>
+                  <span class="badge bg-primary rounded-pill">Domicile</span>
+                </div>
+              </div>
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">{{ match.equipe_exterieur.nom }}</h6>
+                    <small class="text-muted">Équipe visiteuse</small>
+                  </div>
+                  <span class="badge bg-secondary rounded-pill">Extérieur</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.team-logo {
+  max-width: 100%;
+  height: auto;
+}
+
+.score-display {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.score {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.match-info-card {
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.match-date {
+  font-size: 0.9rem;
+}
+</style>
+{% endblock %} 

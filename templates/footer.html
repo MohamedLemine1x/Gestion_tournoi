@@ -1,0 +1,320 @@
+<!-- Simple Footer -->
+<footer class="simple-footer">
+  <div class="container py-4">
+    <div class="row">
+      <!-- Company Info -->
+      <div class="col-md-6 mb-4 mb-md-0">
+        <div class="footer-brand d-flex align-items-center mb-3">
+          <i class="fas fa-futbol footer-logo-icon"></i>
+          <span class="ms-2 footer-logo-text">TournoiPRO</span>
+        </div>
+        <p class="footer-description">
+          La plateforme de référence pour l'organisation et la gestion de tournois de football.
+        </p>
+        <div class="footer-social-links mt-4">
+          <a href="#" class="social-link" aria-label="Facebook">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link" aria-label="Twitter">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Quick Links -->
+      <div class="col-md-3 mb-4 mb-md-0">
+        <h5 class="footer-title">Liens rapides</h5>
+        <ul class="footer-links">
+          <li><a href="/tournois/">Tournois</a></li>
+          <li><a href="/equipes/">Équipes</a></li>
+          <li><a href="/contact/">Contact</a></li>
+        </ul>
+      </div>
+      
+      <!-- Contact -->
+      <div class="col-md-3">
+        <h5 class="footer-title">Contact</h5>
+        <div class="footer-contact">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-envelope footer-icon"></i>
+            <a href="mailto:contact@tournoipro.com" class="ms-2">contact@tournoipro.com</a>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-phone-alt footer-icon"></i>
+            <a href="tel:+33123456789" class="ms-2">+33 1 23 45 67 89</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Copyright -->
+    <div class="row mt-4 pt-3 border-top">
+      <div class="col-md-6 text-center text-md-start">
+        <p class="mb-0">© 2025 TournoiPRO. Tous droits réservés.</p>
+      </div>
+      <div class="col-md-6">
+        <ul class="footer-bottom-links">
+          <li><a href="/privacy/">Confidentialité</a></li>
+          <li><a href="/terms/">Conditions</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+/* Simple Footer Styles */
+.simple-footer {
+  background-color: #0c2461;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Inter', sans-serif;
+}
+
+.footer-logo-icon {
+  font-size: 1.75rem;
+  color: #4a69bd;
+}
+
+.footer-logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+}
+
+.footer-title {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.footer-title:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 50px;
+  background-color: #4a69bd;
+}
+
+.footer-description {
+  font-size: 0.95rem;
+  max-width: 400px;
+}
+
+.footer-links {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.social-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  margin-right: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background-color: #4a69bd;
+  color: white;
+  transform: translateY(-3px);
+}
+
+.footer-icon {
+  color: #4a69bd;
+  width: 18px;
+  text-align: center;
+}
+
+.footer-contact a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-contact a:hover {
+  color: white;
+}
+
+.footer-bottom-links {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .footer-bottom-links {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}
+
+.footer-bottom-links li {
+  margin-left: 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .footer-bottom-links li {
+    margin: 0 0.75rem;
+  }
+}
+
+.footer-bottom-links a {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.footer-bottom-links a:hover {
+  color: white;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Intersection Observer pour les animations au scroll
+  const animateElements = document.querySelectorAll('.animate-on-scroll');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const delay = parseInt(el.dataset.delay) || 0;
+        const animation = el.dataset.animation || 'fadeInUp';
+        
+        setTimeout(() => {
+          el.classList.add('animated');
+          el.style.animation = `${animation} 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`;
+        }, delay);
+        
+        observer.unobserve(el);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '50px'
+  });
+  
+  animateElements.forEach(el => observer.observe(el));
+  
+  // Gestion du formulaire de newsletter
+  const newsletterForm = document.querySelector('.footer-newsletter');
+  if (newsletterForm) {
+    newsletterForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const form = this;
+      const button = form.querySelector('.btn-newsletter');
+      const input = form.querySelector('input[type="email"]');
+      const originalHTML = button.innerHTML;
+      
+      // Validation de l'email
+      if (!input.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        input.classList.add('is-invalid');
+        return;
+      }
+      
+      // Ajout de la classe de chargement
+      form.classList.add('loading');
+      button.disabled = true;
+      
+      try {
+        // Simulation d'une requête API
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Succès
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.add('btn-success');
+        input.value = '';
+        input.classList.remove('is-invalid');
+        
+        // Message de succès
+        const successMessage = document.createElement('div');
+        successMessage.className = 'alert alert-success mt-2';
+        successMessage.textContent = 'Merci pour votre inscription !';
+        form.appendChild(successMessage);
+        
+        // Suppression du message après 3 secondes
+        setTimeout(() => {
+          successMessage.remove();
+          button.innerHTML = originalHTML;
+          button.classList.remove('btn-success');
+          button.disabled = false;
+          form.classList.remove('loading');
+        }, 3000);
+        
+      } catch (error) {
+        // Gestion des erreurs
+        button.innerHTML = '<i class="fas fa-times"></i>';
+        button.classList.add('btn-danger');
+        
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'alert alert-danger mt-2';
+        errorMessage.textContent = 'Une erreur est survenue. Veuillez réessayer.';
+        form.appendChild(errorMessage);
+        
+        setTimeout(() => {
+          errorMessage.remove();
+          button.innerHTML = originalHTML;
+          button.classList.remove('btn-danger');
+          button.disabled = false;
+          form.classList.remove('loading');
+        }, 3000);
+      }
+    });
+    
+    // Validation en temps réel de l'email
+    const emailInput = newsletterForm.querySelector('input[type="email"]');
+    emailInput.addEventListener('input', function() {
+      if (this.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+      } else {
+        this.classList.remove('is-valid');
+        this.classList.add('is-invalid');
+      }
+    });
+  }
+  
+  // Amélioration de l'accessibilité au clavier
+  document.querySelectorAll('.footer-link, .social-link, .legal-link, .resource-link, .contact-link').forEach(link => {
+    link.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.click();
+      }
+    });
+  });
+});
+</script>

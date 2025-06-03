@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Détails du Match | TournoiPRO{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <div class="football-icon football-icon-lg me-2"></div>
+            <h2 class="mb-0">Match: Équipe A vs Équipe B</h2>
+        </div>
+        
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="football-icon football-icon-sm football-icon-primary me-2"></i>
+                        <strong>Date:</strong> <span class="ms-2">15 Novembre 2023</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="football-icon football-icon-sm me-2"></i>
+                        <strong>Heure:</strong> <span class="ms-2">15:30</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="football-icon football-icon-sm me-2"></i>
+                        <strong>Stade:</strong> <span class="ms-2">Stade Municipal</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="football-icon football-icon-sm football-icon-success me-2"></i>
+                        <strong>Tournoi:</strong> <span class="ms-2">Coupe Régionale 2023</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="football-icon football-icon-sm me-2"></i>
+                        <strong>Phase:</strong> <span class="ms-2">Demi-finale</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="football-icon football-icon-sm football-icon-danger me-2"></i>
+                        <strong>Arbitre:</strong> <span class="ms-2">Jean Dupont</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Score -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="text-center me-4">
+                                    <img src="{% static 'img/avatar-1.jpg' %}" class="rounded-circle mb-2" width="60" height="60" alt="Équipe A">
+                                    <h4>Équipe A</h4>
+                                </div>
+                                <div class="score-display px-4 py-2 rounded bg-white shadow-sm">
+                                    <span class="display-4 fw-bold">2</span>
+                                    <span class="display-5 mx-2">-</span>
+                                    <span class="display-4 fw-bold">1</span>
+                                </div>
+                                <div class="text-center ms-4">
+                                    <img src="{% static 'img/avatar-2.jpg' %}" class="rounded-circle mb-2" width="60" height="60" alt="Équipe B">
+                                    <h4>Équipe B</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Événements du match -->
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="mb-3 d-flex align-items-center">
+                        <i class="football-icon football-icon-spin me-2"></i>
+                        Événements du match
+                    </h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Minute</th>
+                                    <th>Équipe</th>
+                                    <th>Événement</th>
+                                    <th>Joueur</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>15'</td>
+                                    <td>Équipe A</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="football-icon football-icon-sm me-2"></i>
+                                            But
+                                        </div>
+                                    </td>
+                                    <td>Pierre Martin</td>
+                                </tr>
+                                <tr>
+                                    <td>32'</td>
+                                    <td>Équipe B</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="football-icon football-icon-sm football-icon-danger me-2"></i>
+                                            Carton Rouge
+                                        </div>
+                                    </td>
+                                    <td>Lucas Dubois</td>
+                                </tr>
+                                <tr>
+                                    <td>67'</td>
+                                    <td>Équipe A</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="football-icon football-icon-sm me-2"></i>
+                                            But
+                                        </div>
+                                    </td>
+                                    <td>Antoine Bernard</td>
+                                </tr>
+                                <tr>
+                                    <td>89'</td>
+                                    <td>Équipe B</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="football-icon football-icon-sm me-2"></i>
+                                            But
+                                        </div>
+                                    </td>
+                                    <td>Thomas Leroy</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-outline-primary">
+                    <i class="football-icon football-icon-sm me-2"></i>
+                    Statistiques du match
+                </button>
+                <button class="btn btn-success">
+                    <i class="football-icon football-icon-sm me-2"></i>
+                    Télécharger le rapport
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

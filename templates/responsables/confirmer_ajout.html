@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmer l'ajout{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle"></i> 
+                        Confirmer l'ajout du membre
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h6>Récapitulatif de l'ajout</h6>
+                        <ul class="mb-0">
+                            <li><strong>Équipe :</strong> {{ equipe.nom }}</li>
+                            <li><strong>Nouveau membre :</strong> {{ utilisateur.get_full_name|default:utilisateur.username }}</li>
+                            <li><strong>Email :</strong> {{ utilisateur.email }}</li>
+                            <li><strong>Position :</strong> {{ position|default:"Non définie" }}</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Êtes-vous sûr de vouloir ajouter ce membre à votre équipe ?</p>
+                    
+                    <form method="post" action="{% url 'responsables:finaliser_ajout' equipe.id utilisateur.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="position" value="{{ position }}">
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'responsables:selectionner_position' equipe.id utilisateur.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Modifier
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Confirmer l'ajout
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

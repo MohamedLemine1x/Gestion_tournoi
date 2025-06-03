@@ -1,0 +1,1417 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil - TournoiPRO{% endblock %}
+
+{% block extra_css %}
+{% with is_auth_page=False %}
+<style>
+/******************************************
+ * PARTIE 1: VARIABLES ET STYLES GLOBAUX
+ ******************************************/
+:root {
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --secondary-color: #2ecc71;
+  --secondary-dark: #27ae60;
+  --accent-color: #f39c12;
+  --danger-color: #e74c3c;
+  --warning-color: #f1c40f;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --text-color: #444;
+  --border-radius: 12px;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --transition-normal: all 0.3s ease;
+}
+
+/* Styles de base */
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Conteneur principal du profil */
+.profile-container {
+  background: linear-gradient(135deg, var(--light-color) 0%, #e9ecef 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Carte de profil */
+.profile-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1.5rem;
+  transition: var(--transition-normal);
+  width: 100%;
+  max-width: 1200px;
+}
+
+.profile-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+/******************************************
+ * PARTIE 2: SECTION INFORMATIONS UTILISATEUR
+ ******************************************/
+/* Section informations utilisateur */
+.user-info-section {
+  padding: 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(46, 204, 113, 0.05));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Avatar et bouton d'édition */
+.avatar-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 1rem;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: var(--transition-normal);
+}
+
+.avatar-container:hover .avatar-image {
+  filter: brightness(90%);
+}
+
+.avatar-edit-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  transition: var(--transition-normal);
+}
+
+.avatar-edit-btn:hover {
+  background-color: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+/* Nom utilisateur et badges */
+.username {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: var(--dark-color);
+  font-weight: 600;
+}
+
+.user-badge {
+  border-radius: 20px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.badge-invite {
+  background: rgba(52, 152, 219, 0.1);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.badge-responsable {
+  background: rgba(46, 204, 113, 0.1);
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+.badge-organisateur {
+  background: rgba(243, 156, 18, 0.1);
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+
+.joined-date {
+  color: #777;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Statistiques utilisateur */
+.user-stats {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 0 8px;
+}
+
+.stat-item .stat-number {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.stat-item .stat-label {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+/******************************************
+ * PARTIE 3: NAVIGATION ET CONTENU DES ONGLETS
+ ******************************************/
+/* Navigation par onglets */
+.nav-tabs-custom {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background-color: var(--light-color);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-tabs-custom::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-tabs-custom .nav-link {
+  padding: 0.8rem 1rem;
+  color: var(--text-color);
+  font-weight: 500;
+  transition: var(--transition-normal);
+}
+
+.nav-tabs-custom .nav-link:hover {
+  color: var(--primary-color);
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+.nav-tabs-custom .nav-link.active {
+  color: var(--primary-color);
+  font-weight: 600;
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.nav-tabs-custom .nav-link i {
+  margin-right: 0.4rem;
+}
+
+/* Contenu des onglets */
+.tab-content {
+  padding: 1.5rem;
+}
+
+.tab-pane h4 {
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+  color: var(--dark-color);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+}
+
+/* Formulaire de profil */
+.profile-form .form-label {
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+.profile-form .form-control {
+  border-radius: 8px;
+  padding: 0.7rem;
+  border: 1px solid #dee2e6;
+  transition: var(--transition-normal);
+}
+
+.profile-form .form-control:focus {
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+  border-color: var(--primary-color);
+}
+
+.profile-form textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Boutons */
+.btn-primary-custom {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 600;
+  color: white;
+  transition: var(--transition-normal);
+  box-shadow: 0 3px 8px rgba(52, 152, 219, 0.2);
+}
+
+.btn-primary-custom:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  transform: translateY(-2px);
+}
+
+.btn-primary-custom i {
+  margin-right: 0.4rem;
+}
+
+.btn-outline-primary-custom {
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn-outline-primary-custom:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Grille d'équipes */
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+.team-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  padding: 1rem;
+  transition: var(--transition-normal);
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.team-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.team-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--primary-color);
+}
+
+.team-info h5 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.team-meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.team-tournament-info {
+  margin-top: auto;
+  padding: 0.6rem;
+  background-color: rgba(248, 249, 250, 0.7);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+/* État vide */
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #666;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 12px;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.empty-state-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+/******************************************
+ * PARTIE 4: MODALS ET ÉLÉMENTS D'INTERFACE
+ ******************************************/
+/* Modal d'avatar */
+.avatar-modal .modal-content {
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-modal .modal-header {
+  background: var(--primary-color);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  padding: 1rem;
+}
+
+.avatar-preview {
+  max-height: 180px;
+  border-radius: 12px;
+  border: 2px solid var(--primary-color);
+}
+
+/* Alertes */
+.alert-custom {
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.alert-success {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: var(--secondary-dark);
+  border-left: 3px solid var(--secondary-color);
+}
+
+.alert-danger {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--danger-color);
+  border-left: 3px solid var(--danger-color);
+}
+
+.alert-info {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: var(--primary-dark);
+  border-left: 3px solid var(--primary-color);
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert-custom {
+  animation: fadeInDown 0.4s ease-out;
+}
+
+/* Badge de statut d'équipe */
+.team-status-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.team-status-active {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+}
+
+.team-status-pending {
+  background-color: rgba(243, 156, 18, 0.1);
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+
+/* Spinner de chargement */
+.loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Infobulles */
+.custom-tooltip .tooltip-text {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: white;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-size: 0.75rem;
+  max-width: 180px;
+}
+
+.custom-tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+.custom-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Accessibilité */
+.screen-reader-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.focus-effect:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
+/******************************************
+ * PARTIE 5: RESPONSIVE DESIGN
+ ******************************************/
+/* Ajustements pour appareils grands */
+@media (max-width: 991.98px) {
+  .teams-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+/* Ajustements pour appareils moyens */
+@media (max-width: 767.98px) {
+  .profile-container {
+    padding: 1rem 0;
+  }
+  .user-info-section {
+    padding: 1rem;
+  }
+  .avatar-container {
+    width: 110px;
+    height: 110px;
+  }
+  .username {
+    font-size: 1.4rem;
+  }
+  .nav-tabs-custom .nav-link {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .tab-content {
+    padding: 1rem;
+  }
+  .user-stats {
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .teams-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ajustements pour appareils petits */
+@media (max-width: 575.98px) {
+  .avatar-container {
+    width: 90px;
+    height: 90px;
+  }
+  .username {
+    font-size: 1.2rem;
+  }
+  .team-actions {
+    flex-direction: column;
+  }
+  .avatar-edit-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Password strength meter */
+.password-strength-meter {
+  height: 5px;
+  border-radius: 3px;
+  margin-top: 8px;
+  background-color: #e9ecef;
+  overflow: hidden;
+  position: relative;
+}
+
+.password-strength-meter::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-meter.weak::before {
+  background-color: #e74c3c;
+  width: 25%;
+}
+
+.password-strength-meter.medium::before {
+  background-color: #f39c12;
+  width: 50%;
+}
+
+.password-strength-meter.strong::before {
+  background-color: #f1c40f;
+  width: 75%;
+}
+
+.password-strength-meter.very-strong::before {
+  background-color: #2ecc71;
+  width: 100%;
+}
+
+/* Password toggle button */
+.password-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+  /* Password form container animation */
+  .password-form-container {
+    transition: all 0.3s ease;
+  }
+
+/* Input group styling */
+.input-group .input-group-text {
+  color: #6c757d;
+  border-right: none;
+}
+
+.input-group .form-control {
+  border-left: none;
+}
+
+.input-group .form-control:focus {
+  border-color: #dee2e6;
+  box-shadow: none;
+}
+
+.input-group .form-control:focus + .password-toggle-btn {
+  border-color: var(--primary-color);
+}
+
+/* Password validation message */
+#passwordMatchFeedback.valid {
+  color: var(--secondary-color);
+}
+
+#passwordMatchFeedback.invalid {
+  color: var(--danger-color);
+}
+</style>
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+{% if form_processed %}
+  <div id="form-processed-data" 
+       data-status="{{ form_status }}" 
+       data-message="{{ form_message }}" 
+       data-form-type="{{ form_type }}"
+       style="display: none;"></div>
+{% endif %}
+
+<div class="profile-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <div class="profile-card">
+          <!-- SECTION 1: INFORMATIONS UTILISATEUR -->
+          <div class="user-info-section">
+            <!-- Avatar utilisateur -->
+            <div class="avatar-container">
+              <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'img/default-avatar.svg' %}{% endif %}"
+                   alt="Avatar de {{ user.username }}"
+                   class="avatar-image"
+                   loading="lazy">
+              <button class="btn btn-primary avatar-edit-btn focus-effect"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#avatarModal"
+                      aria-label="Modifier votre avatar">
+                <i class="fas fa-camera"></i>
+              </button>
+            </div>
+            <!-- Nom d'utilisateur et badges -->
+            <h2 class="username">{{ user.username }}</h2>
+            <div class="mb-2">
+              {% if user.type == 'participant' %}
+                <span class="user-badge badge-invite"><i class="fas fa-user me-1"></i>Participant</span>
+              {% elif user.type == 'responsable' %}
+                <span class="user-badge badge-responsable"><i class="fas fa-users-cog me-1"></i>Responsable d'équipe</span>
+              {% else %}
+                <span class="user-badge badge-organisateur"><i class="fas fa-trophy me-1"></i>Organisateur</span>
+              {% endif %}
+            </div>
+            <!-- Date d'inscription -->
+            <p class="joined-date">
+              <i class="fas fa-calendar-alt me-1"></i>Membre depuis {{ user.date_joined|date:"F Y" }}
+            </p>
+          </div>
+          
+          <!-- SECTION 2: NAVIGATION PAR ONGLETS -->
+          <ul class="nav nav-tabs nav-tabs-custom" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active focus-effect" 
+                      id="profile-tab" 
+                      data-bs-toggle="tab" 
+                      data-bs-target="#profile" 
+                      type="button" 
+                      role="tab" 
+                      aria-controls="profile" 
+                      aria-selected="true">
+                <i class="fas fa-user"></i>Mon Profil
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link focus-effect" 
+                      id="security-tab" 
+                      data-bs-toggle="tab" 
+                      data-bs-target="#security" 
+                      type="button" 
+                      role="tab" 
+                      aria-controls="security" 
+                      aria-selected="false">
+                <i class="fas fa-shield-alt"></i>Sécurité
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a href="{% url 'accounts:notification_preferences' %}" class="nav-link focus-effect">
+                <i class="fas fa-bell"></i>Notifications
+              </a>
+            </li>
+          </ul>
+          
+          <!-- SECTION 3: CONTENU DES ONGLETS -->
+          <div class="tab-content">
+            <!-- Tab 1: Informations personnelles -->
+            <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+              <h4><i class="fas fa-user-edit me-1"></i>Informations personnelles</h4>
+              <form method="post" class="profile-form" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="profile">
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-3 mb-md-0">
+                    <label class="form-label" for="{{ form.username.id_for_label }}">Nom d'utilisateur</label>
+                    {{ form.username }}
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                  </div>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Tab 2: Sécurité du compte -->
+            <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+              <h4><i class="fas fa-shield-alt me-1"></i>Sécurité du compte</h4>
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h5 class="mb-3 d-flex align-items-center justify-content-between">
+                    <span><i class="fas fa-lock me-2"></i>Mot de passe</span>
+                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                            id="togglePasswordForm" aria-expanded="false">
+                      <i class="fas fa-edit me-1"></i>Modifier
+                    </button>
+                  </h5>
+                  <p class="text-muted mb-3">Changez votre mot de passe régulièrement pour sécuriser votre compte.</p>
+                  
+                  <div id="passwordFormContainer" class="password-form-container" style="display: none;">
+                    <div class="card border-primary-subtle mb-3">
+                      <div class="card-body bg-light rounded-3 p-4">
+                        <form method="post" class="password-form" id="passwordForm">
+                          {% csrf_token %}
+                          <input type="hidden" name="form_type" value="change_password">
+                          <div class="mb-3">
+                            <label for="old_password" class="form-label fw-medium">Mot de passe actuel</label>
+                            <div class="input-group">
+                              <span class="input-group-text bg-white"><i class="fas fa-key text-muted"></i></span>
+                              <input type="password" class="form-control focus-effect" id="old_password" name="old_password" required>
+                              <button type="button" class="btn btn-outline-secondary password-toggle-btn" data-target="old_password">
+                                <i class="fas fa-eye"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <div class="mb-3">
+                            <label for="new_password1" class="form-label fw-medium">Nouveau mot de passe</label>
+                            <div class="input-group">
+                              <span class="input-group-text bg-white"><i class="fas fa-lock text-muted"></i></span>
+                              <input type="password" class="form-control focus-effect" id="new_password1" name="new_password1" required>
+                              <button type="button" class="btn btn-outline-secondary password-toggle-btn" data-target="new_password1">
+                                <i class="fas fa-eye"></i>
+                              </button>
+                            </div>
+                            <div class="password-strength-meter mt-2" id="passwordStrength"></div>
+                          </div>
+                          <div class="mb-4">
+                            <label for="new_password2" class="form-label fw-medium">Confirmation du nouveau mot de passe</label>
+                            <div class="input-group">
+                              <span class="input-group-text bg-white"><i class="fas fa-check-circle text-muted"></i></span>
+                              <input type="password" class="form-control focus-effect" id="new_password2" name="new_password2" required>
+                              <button type="button" class="btn btn-outline-secondary password-toggle-btn" data-target="new_password2">
+                                <i class="fas fa-eye"></i>
+                              </button>
+                            </div>
+                            <div id="passwordMatchFeedback" class="form-text"></div>
+                          </div>
+                          <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary" id="cancelPasswordChange">
+                              <i class="fas fa-times me-1"></i>Annuler
+                            </button>
+                            <button type="submit" class="btn btn-primary-custom" id="changePasswordBtn">
+                              <i class="fas fa-key me-1"></i>Changer mon mot de passe
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="mb-2"><i class="fas fa-exclamation-triangle me-1"></i>Suppression du compte</h5>
+                  <p class="text-danger">La suppression de votre compte est irréversible.</p>
+                  <button type="button" class="btn btn-outline-danger focus-effect" 
+                          data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                    <i class="fas fa-trash-alt me-1"></i>Supprimer mon compte
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: MODALES -->
+<!-- Modal d'avatar -->
+<div class="modal fade avatar-modal" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="avatarModalLabel"><i class="fas fa-camera me-1"></i>Modifier votre avatar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="avatar">
+          <input type="hidden" name="success_redirect" value="?tab=profile&status=success&form=avatar">
+          <div class="avatar-preview-container">
+            <img id="avatarPreview" src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" 
+                 class="avatar-preview" loading="lazy">
+          </div>
+          <div class="mb-3">
+            <label for="avatarUpload" class="form-label">Sélectionner une image</label>
+            <input type="file" class="form-control focus-effect" id="avatarUpload" name="avatar" accept="image/*" required>
+            <small class="form-text text-muted">Formats : JPG, PNG, GIF. Taille max : 2MB.</small>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary focus-effect" data-bs-dismiss="modal">
+              <i class="fas fa-times me-1"></i>Annuler
+            </button>
+            <button type="submit" class="btn btn-primary-custom focus-effect">
+              <i class="fas fa-check me-1"></i>Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de suppression de compte -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteAccountModalLabel"><i class="fas fa-exclamation-triangle me-1"></i>Supprimer mon compte</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-circle me-1"></i>Cette action est irréversible !
+        </div>
+        <p>La suppression entraînera la perte de toutes vos données :</p>
+        <ul>
+          <li>Informations personnelles</li>
+          <li>Équipes et leurs données</li>
+          <li>Tournois (si organisateur)</li>
+        </ul>
+        <form method="post" id="deleteAccountForm">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="delete_account">
+          <div class="form-check mb-3">
+            <input class="form-check-input focus-effect" type="checkbox" id="confirmDelete" name="confirm_delete" required>
+            <label class="form-check-label" for="confirmDelete">
+              Je confirme la suppression de mon compte
+            </label>
+          </div>
+          <div class="mb-3">
+            <label for="deletePassword" class="form-label">Mot de passe</label>
+            <input type="password" class="form-control focus-effect" id="deletePassword" name="password" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary focus-effect" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Annuler
+        </button>
+        <button type="submit" form="deleteAccountForm" class="btn btn-danger focus-effect">
+          <i class="fas fa-trash-alt me-1"></i>Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/******************************************
+ * PARTIE 1: INITIALISATION ET UTILITAIRES
+ ******************************************/
+document.addEventListener('DOMContentLoaded', () => {
+  // Fonction utilitaire pour le debouncing
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+  
+  // Activer l'onglet correct basé sur les paramètres URL
+  const activateCorrectTab = () => {
+    // Obtenir le paramètre 'tab' de l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    
+    if (tabParam) {
+      const tabToActivate = document.getElementById(`${tabParam}-tab`);
+      if (tabToActivate) {
+        const tab = new bootstrap.Tab(tabToActivate);
+        tab.show();
+      }
+    }
+  };
+  
+  // Activation de l'onglet correct au chargement
+  activateCorrectTab();
+  
+  // Mise en place des toggles pour les mots de passe
+  const setupPasswordToggles = () => {
+    const toggleBtns = document.querySelectorAll('.password-toggle-btn');
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const inputField = document.getElementById(targetId);
+        
+        if (inputField.type === 'password') {
+          inputField.type = 'text';
+          btn.querySelector('i').classList.remove('fa-eye');
+          btn.querySelector('i').classList.add('fa-eye-slash');
+        } else {
+          inputField.type = 'password';
+          btn.querySelector('i').classList.remove('fa-eye-slash');
+          btn.querySelector('i').classList.add('fa-eye');
+        }
+      });
+    });
+  };
+  
+  // Initialiser les toggles de mots de passe
+  setupPasswordToggles();
+
+  /******************************************
+   * PARTIE 2: GESTION DES AVATARS ET FORMULAIRES
+   ******************************************/
+  // Prévisualisation de l'avatar
+  const setupAvatarPreview = () => {
+    const avatarUpload = document.getElementById('avatarUpload');
+    const avatarPreview = document.getElementById('avatarPreview');
+    if (avatarUpload && avatarPreview) {
+      avatarUpload.addEventListener('change', () => {
+        if (avatarUpload.files?.[0]) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            avatarPreview.src = e.target.result;
+          };
+          reader.readAsDataURL(avatarUpload.files[0]);
+        }
+      });
+    }
+  };
+
+  // Traitement des formulaires et retour utilisateur
+  const setupFormProcessing = () => {
+    // Feedback après soumission de formulaire
+    const formProcessedData = document.getElementById('form-processed-data');
+    if (formProcessedData) {
+      const { status, message, formType } = formProcessedData.dataset;
+      if (status && message) {
+        const alertContainer = document.createElement('div');
+        alertContainer.className = `alert alert-${status} alert-custom alert-dismissible fade show`;
+        alertContainer.role = 'alert';
+        const icon = {
+          success: 'check-circle',
+          danger: 'exclamation-circle',
+          error: 'exclamation-circle',
+          info: 'info-circle',
+          warning: 'exclamation-triangle'
+        }[status] || 'info-circle';
+        alertContainer.innerHTML = `
+          <i class="fas fa-${icon} me-1"></i>${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        `;
+        const tabContent = document.querySelector('.tab-content');
+        tabContent?.prepend(alertContainer);
+        
+        // Fermeture automatique des alertes
+        setTimeout(() => {
+          alertContainer.style.opacity = '0';
+          setTimeout(() => bootstrap.Alert.getOrCreateInstance(alertContainer)?.close(), 400);
+        }, 5000);
+
+        // Activation de l'onglet concerné
+        const tabMap = {
+          profile: 'profile-tab',
+          avatar: 'profile-tab',
+          team: 'teams-tab',
+          security: 'security-tab',
+          password: 'security-tab'
+        };
+        const tabId = tabMap[formType];
+        if (tabId) {
+          const tabElement = document.getElementById(tabId);
+          tabElement && bootstrap.Tab.getOrCreateInstance(tabElement).show();
+        }
+      }
+    }
+
+    // Fermeture automatique des alertes
+    const alerts = document.querySelectorAll('.alert-custom');
+    if (alerts.length) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              const alert = entry.target;
+              alert.style.opacity = '0';
+              setTimeout(() => bootstrap.Alert.getOrCreateInstance(alert)?.close(), 400);
+            }, 5000);
+            observer.unobserve(alert);
+          }
+        });
+      }, { threshold: 0.5 });
+      alerts.forEach(alert => observer.observe(alert));
+    }
+
+    // Formatage du numéro de téléphone
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', debounce((e) => {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 10);
+        if (value.length) {
+          value = value.replace(/^(\d{2})(\d{2})?(\d{2})?(\d{2})?(\d{2})?$/, 
+            (match, p1, p2, p3, p4, p5) => [p1, p2, p3, p4, p5].filter(Boolean).join(' '));
+        }
+        e.target.value = value;
+      }, 100));
+    }
+
+    // Validation des formulaires
+    const profileForm = document.querySelector('.profile-form');
+    if (profileForm) {
+      // Mise en évidence des champs valides
+      const inputs = profileForm.querySelectorAll('input[type="text"], input[type="tel"], textarea');
+      inputs.forEach(input => {
+        input.classList.toggle('is-valid', input.value.trim().length > 0);
+        input.addEventListener('input', () => {
+          input.classList.toggle('is-valid', input.value.trim().length > 0);
+        });
+      });
+
+      // Gestion de la soumission avec état de chargement
+      profileForm.addEventListener('submit', (e) => {
+        const submitButton = profileForm.querySelector('button[type="submit"]');
+        if (submitButton) {
+          submitButton.disabled = true;
+          const originalText = submitButton.innerHTML;
+          submitButton.innerHTML = '<span class="loading-spinner me-1"></span>Enregistrement...';
+          localStorage.setItem('formPending', 'true');
+          setTimeout(() => {
+            if (submitButton.disabled) {
+              submitButton.disabled = false;
+              submitButton.innerHTML = originalText;
+            }
+          }, 10000);
+        }
+      });
+    }
+
+    // Confirmation de suppression de compte
+    const confirmDeleteCheckbox = document.getElementById('confirmDelete');
+    const deleteSubmitButton = document.querySelector('#deleteAccountModal button[type="submit"]');
+    if (confirmDeleteCheckbox && deleteSubmitButton) {
+      deleteSubmitButton.disabled = true;
+      confirmDeleteCheckbox.addEventListener('change', () => {
+        deleteSubmitButton.disabled = !confirmDeleteCheckbox.checked;
+      });
+      document.getElementById('deleteAccountForm')?.addEventListener('submit', (e) => {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+          e.preventDefault();
+        }
+      });
+    }
+  };
+
+  /******************************************
+   * PARTIE 3: NAVIGATION ET INTERFACE UTILISATEUR
+   ******************************************/
+  // Configuration de la navigation par onglets
+  const setupTabNavigation = () => {
+    const triggerTabList = document.querySelectorAll('#profileTabs button[data-bs-toggle="tab"]');
+    const tabMap = new Map();
+    triggerTabList.forEach(triggerEl => {
+      const tabTarget = triggerEl.getAttribute('data-bs-target').slice(1);
+      tabMap.set(tabTarget, triggerEl);
+      triggerEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tabTarget);
+        history.pushState({}, '', url);
+      });
+    });
+
+    // Restauration de l'onglet actif depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab');
+    if (activeTab && tabMap.has(activeTab)) {
+      bootstrap.Tab.getOrCreateInstance(tabMap.get(activeTab)).show();
+    }
+  };
+
+  // Animations de l'interface
+  const setupUIAnimations = () => {
+    // Animation de la carte de profil
+    const profileCard = document.querySelector('.profile-card');
+    if (profileCard) {
+      profileCard.style.opacity = '0';
+      profileCard.style.transform = 'translateY(15px)';
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          profileCard.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          profileCard.style.opacity = '1';
+          profileCard.style.transform = 'translateY(0)';
+        }, 100);
+      });
+    }
+
+    // Animation des cartes d'équipe
+    const teamCards = document.querySelectorAll('.team-card');
+    if (teamCards.length) {
+      const teamObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                entry.target.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateX(0)';
+              }, 50 * (index % 10));
+            });
+            teamObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      teamCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        teamObserver.observe(card);
+      });
+    }
+  };
+
+  // Gestion des infobulles
+  const setupTooltips = () => {
+    document.addEventListener('mouseover', (e) => {
+      const tooltip = e.target.closest('.custom-tooltip');
+      if (tooltip) {
+        const tooltipText = tooltip.querySelector('.tooltip-text');
+        if (tooltipText) {
+          clearTimeout(tooltip.tooltipTimer);
+          tooltip.tooltipTimer = setTimeout(() => {
+            tooltipText.style.opacity = '1';
+            tooltipText.style.visibility = 'visible';
+          }, 200);
+        }
+      }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const tooltip = e.target.closest('.custom-tooltip');
+      if (tooltip) {
+        const tooltipText = tooltip.querySelector('.tooltip-text');
+        if (tooltipText) {
+          clearTimeout(tooltip.tooltipTimer);
+          tooltipText.style.opacity = '0';
+          tooltipText.style.visibility = 'hidden';
+        }
+      }
+    });
+  };
+
+  /******************************************
+   * PARTIE 4: ACCESSIBILITÉ ET COMPATIBILITÉ
+   ******************************************/
+  // Configuration des fonctionnalités d'accessibilité
+  const setupAccessibility = () => {
+    // Support du mode de mouvement réduit
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.style.setProperty('--transition-normal', 'none');
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = `
+        .profile-card:hover, .team-card:hover, .btn-primary-custom:hover,
+        .btn-outline-primary-custom:hover, .avatar-edit-btn:hover {
+          transform: none !important;
+        }
+        @keyframes fadeInDown { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes spin { to { transform: none; } }
+      `;
+      document.head.appendChild(styleSheet);
+    }
+
+    // Fallback pour le chargement paresseux d'images
+    if (!('loading' in HTMLImageElement.prototype)) {
+      const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+      if (lazyImages.length) {
+        const imageObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              if (img.dataset.src) img.src = img.dataset.src;
+              imageObserver.unobserve(img);
+            }
+          });
+        });
+        lazyImages.forEach(img => img.dataset.src && imageObserver.observe(img));
+      }
+    }
+
+    // Mode d'économie de données
+    if (navigator.connection?.saveData) {
+      document.querySelectorAll('img:not([loading="eager"])').forEach(img => {
+        img.setAttribute('loading', 'lazy');
+      });
+    }
+
+    // Chargement des polices
+    document.fonts.ready.then(() => {
+      document.documentElement.classList.add('fonts-loaded');
+    });
+  };
+
+  // Initialisation de toutes les fonctionnalités
+  setupAvatarPreview();
+  setupFormProcessing();
+  setupTabNavigation();
+  setupUIAnimations();
+  setupTooltips();
+  setupAccessibility();
+
+  /******************************************
+   * PARTIE 5: GESTION DU MOT DE PASSE
+   ******************************************/
+  // Toggle du formulaire de changement de mot de passe
+  const setupPasswordForm = () => {
+    const toggleBtn = document.getElementById('togglePasswordForm');
+    const formContainer = document.getElementById('passwordFormContainer');
+    const cancelBtn = document.getElementById('cancelPasswordChange');
+    
+    if (toggleBtn && formContainer) {
+      toggleBtn.addEventListener('click', () => {
+        const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        toggleBtn.setAttribute('aria-expanded', !isExpanded);
+        
+        if (isExpanded) {
+          // Hide the form
+          formContainer.style.display = 'none';
+          toggleBtn.innerHTML = '<i class="fas fa-edit me-1"></i>Modifier';
+          console.log('Password form hidden');
+        } else {
+          // Show the form
+          formContainer.style.display = 'block';
+          toggleBtn.innerHTML = '<i class="fas fa-times-circle me-1"></i>Annuler';
+          // Focus on the first field
+          setTimeout(() => document.getElementById('old_password')?.focus(), 100);
+          console.log('Password form shown');
+        }
+      });
+      
+      // Cancel button functionality
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          formContainer.style.display = 'none';
+          toggleBtn.innerHTML = '<i class="fas fa-edit me-1"></i>Modifier';
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          
+          // Reset form
+          document.getElementById('passwordForm')?.reset();
+          document.getElementById('passwordStrength').className = 'password-strength-meter';
+          document.getElementById('passwordMatchFeedback').textContent = '';
+        });
+      }
+      
+      // Check if URL parameters indicate we should show the form
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('form') === 'password') {
+        toggleBtn.click();
+      }
+    }
+  };
+  
+  // Password strength meter
+  const setupPasswordStrengthMeter = () => {
+    const password1Input = document.getElementById('new_password1');
+    const strengthMeter = document.getElementById('passwordStrength');
+    
+    if (password1Input && strengthMeter) {
+      password1Input.addEventListener('input', () => {
+        const password = password1Input.value;
+        let strength = 0;
+        
+        // Basic criteria
+        if (password.length >= 8) strength += 1;
+        if (/[A-Z]/.test(password)) strength += 1;
+        if (/[0-9]/.test(password)) strength += 1;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+        
+        // Update the meter class
+        strengthMeter.className = 'password-strength-meter';
+        if (password.length === 0) {
+          strengthMeter.className = 'password-strength-meter';
+        } else if (strength === 1) {
+          strengthMeter.className = 'password-strength-meter weak';
+        } else if (strength === 2) {
+          strengthMeter.className = 'password-strength-meter medium';
+        } else if (strength === 3) {
+          strengthMeter.className = 'password-strength-meter strong';
+        } else {
+          strengthMeter.className = 'password-strength-meter very-strong';
+        }
+      });
+    }
+  };
+  
+  // Password match validation
+  const setupPasswordMatchValidation = () => {
+    const password1Input = document.getElementById('new_password1');
+    const password2Input = document.getElementById('new_password2');
+    const feedbackElement = document.getElementById('passwordMatchFeedback');
+    const submitButton = document.getElementById('changePasswordBtn');
+    
+    if (password1Input && password2Input && feedbackElement) {
+      const validateMatch = () => {
+        const password1 = password1Input.value;
+        const password2 = password2Input.value;
+        
+        if (password2.length === 0) {
+          feedbackElement.textContent = '';
+          feedbackElement.className = '';
+          return;
+        }
+        
+        if (password1 === password2) {
+          feedbackElement.textContent = 'Les mots de passe correspondent ✓';
+          feedbackElement.className = 'form-text valid';
+          submitButton.disabled = false;
+        } else {
+          feedbackElement.textContent = 'Les mots de passe ne correspondent pas ✗';
+          feedbackElement.className = 'form-text invalid';
+          submitButton.disabled = true;
+        }
+      };
+      
+      password1Input.addEventListener('input', validateMatch);
+      password2Input.addEventListener('input', validateMatch);
+    }
+  };
+  
+  // Form submission handling for password change
+  const setupPasswordFormSubmission = () => {
+    const passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', (e) => {
+        const submitButton = document.getElementById('changePasswordBtn');
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Changement en cours...';
+        }
+      });
+    }
+  };
+  
+  // Initialize password-related functionality
+  setupPasswordForm();
+  setupPasswordStrengthMeter();
+  setupPasswordMatchValidation();
+  setupPasswordFormSubmission();
+});
+</script>
+{% endblock %}

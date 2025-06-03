@@ -1,0 +1,978 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} | TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #4361ee;
+        --primary-light: #7a97ff;
+        --primary-dark: #3a56d4;
+        --accent-color: #ff7d44;
+        --success-color: #06d6a0;
+        --warning-color: #ffd166;
+        --danger-color: #ef476f;
+        --info-color: #0dcaf0;
+    }
+    
+    body {
+        background: #ffffff;
+    }
+    
+    .notification-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        animation: fadeIn 0.5s;
+        background: #ffffff;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(67, 97, 238, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+    }
+    
+    .notification-card.unread {
+        border-left: 4px solid var(--primary-color);
+        background-color: rgba(67, 97, 238, 0.05);
+        animation: pulse 2s infinite;
+    }
+    
+    .notification-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .notification-time {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .notification-type {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .notification-type-info {
+        background-color: rgba(13, 202, 240, 0.15);
+        color: #0891b2;
+    }
+    
+    .notification-type-match_amical {
+        background-color: rgba(6, 214, 160, 0.15);
+        color: #0a9e76;
+    }
+    
+    .notification-type-tournoi {
+        background-color: rgba(239, 71, 111, 0.15);
+        color: #dc3545;
+    }
+    
+    .notification-type-equipe {
+        background-color: rgba(255, 209, 102, 0.15);
+        color: #cc8900;
+    }
+    
+    .notification-type-resultat {
+        background-color: rgba(13, 202, 240, 0.15);
+        color: #0891b2;
+    }
+    
+    .notification-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .notification-actions button {
+        padding: 0.3rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 50px;
+        transition: all 0.2s ease;
+    }
+    
+    .notification-actions button:hover {
+        transform: translateY(-2px);
+    }
+    
+    .empty-state {
+        padding: 4rem 1rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4.5rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+    
+    /* Header improvements */
+    .notifications-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+    }
+    
+    .notifications-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+    
+    .notifications-header h1 {
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+    
+    .notifications-header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    /* Filter bar */
+    .filter-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-option {
+        border-radius: 50px;
+        padding: 0.4rem 1rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: #6c757d;
+        border: 1px solid #e9ecef;
+    }
+    
+    .filter-option:hover {
+        background: #f8f9fa;
+    }
+    
+    .filter-option.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        box-shadow: 0 3px 8px rgba(67, 97, 238, 0.3);
+    }
+    
+    .filter-badge {
+        background: rgba(255, 255, 255, 0.3);
+        color: inherit;
+        border-radius: 50px;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    /* Added for real-time updates */
+    .new-notifications-alert {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1050;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .new-notifications-alert.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    .new-notifications-alert:hover {
+        background: var(--primary-dark);
+        transform: translateX(-50%) translateY(-3px);
+    }
+    
+    .bulk-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Preference settings */
+    .notification-settings {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    
+    .settings-toggle {
+        background: var(--primary-color);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .settings-toggle:hover {
+        background: var(--primary-dark);
+        transform: translateY(-3px);
+    }
+    
+    .settings-panel {
+        position: absolute;
+        bottom: 60px;
+        right: 0;
+        background: white;
+        border-radius: 15px;
+        width: 300px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        padding: 1.5rem;
+        transform: scale(0.9);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        transform-origin: bottom right;
+    }
+    
+    .settings-panel.show {
+        transform: scale(1);
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    .settings-panel h4 {
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        color: var(--primary-color);
+    }
+    
+    .setting-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+    
+    .custom-switch {
+        position: relative;
+        display: inline-block;
+        width: 38px;
+        height: 21px;
+    }
+
+    .custom-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .switch-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .switch-slider:before {
+        position: absolute;
+        content: "";
+        height: 15px;
+        width: 15px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .switch-slider {
+        background-color: var(--primary-color);
+    }
+
+    input:checked + .switch-slider:before {
+        transform: translateX(17px);
+    }
+    
+    /* Animation for reading notification */
+    @keyframes readNotification {
+        0% { background-color: rgba(67, 97, 238, 0.05); }
+        100% { background-color: white; }
+    }
+    
+    .notification-card.reading {
+        animation: readNotification 0.5s forwards;
+        border-left-color: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="new-notifications-alert" id="newNotificationsAlert">
+    <i class="fas fa-bell"></i>
+    <span>Nouvelles notifications disponibles</span>
+</div>
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="notifications-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-6">{{ page_title }}</h1>
+                <p>Consultez et gérez toutes vos notifications</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                {% if notifications %}
+                <div class="bulk-actions">
+                    <form action="{% url 'notifications:marquer_toutes_lues' %}" method="post" id="mark-all-read-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-light btn-lg">
+                            <i class="fas fa-check-double me-2"></i> Tout marquer comme lu
+                        </button>
+                    </form>
+                    <button id="deleteAllBtn" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-trash-alt me-2"></i> Supprimer toutes
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div class="filter-options">
+                <div class="filter-option active" data-filter="all">
+                    <i class="fas fa-layer-group"></i>
+                    Toutes
+                    <span class="filter-badge" id="count-all">{{ notifications.paginator.count }}</span>
+                </div>
+                <div class="filter-option" data-filter="unread">
+                    <i class="fas fa-envelope"></i>
+                    Non lues
+                    <span class="filter-badge" id="count-unread">0</span>
+                </div>
+                <div class="filter-option" data-filter="info">
+                    <i class="fas fa-info-circle"></i>
+                    Info
+                    <span class="filter-badge" id="count-info">0</span>
+                </div>
+                <div class="filter-option" data-filter="match_amical">
+                    <i class="fas fa-handshake"></i>
+                    Matchs
+                    <span class="filter-badge" id="count-match_amical">0</span>
+                </div>
+                <div class="filter-option" data-filter="tournoi">
+                    <i class="fas fa-trophy"></i>
+                    Tournois
+                    <span class="filter-badge" id="count-tournoi">0</span>
+                </div>
+                <div class="filter-option" data-filter="equipe">
+                    <i class="fas fa-users"></i>
+                    Équipes
+                    <span class="filter-badge" id="count-equipe">0</span>
+                </div>
+                <div class="filter-option" data-filter="resultat">
+                    <i class="fas fa-chart-line"></i>
+                    Résultats
+                    <span class="filter-badge" id="count-resultat">0</span>
+                </div>
+            </div>
+
+            <div class="search-filter">
+                <div class="input-group">
+                    <input type="text" id="searchNotifications" class="form-control" placeholder="Rechercher...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications list -->
+    <div id="notificationsContainer">
+        {% if notifications %}
+            <div class="notification-list">
+                {% for notification in notifications %}
+                    <div class="notification-card {% if not notification.lu %}unread{% endif %}" data-id="{{ notification.id }}" data-type="{{ notification.type_notification }}">
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="mb-0 me-2">{{ notification.titre }}</h5>
+                                    <span class="notification-type notification-type-{{ notification.type_notification }}">
+                                        {{ notification.get_type_notification_display }}
+                                    </span>
+                                </div>
+                                <small class="notification-time">{{ notification.date_creation|timesince }}</small>
+                            </div>
+                            <p class="mb-3">{{ notification.message }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="notification-actions">
+                                    {% if notification.lien %}
+                                        <a href="{{ notification.lien }}" class="btn btn-primary">
+                                            <i class="fas fa-external-link-alt me-1"></i> Voir
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if not notification.lu %}
+                                        <form action="{% url 'notifications:marquer_lue' notification.id %}" method="post" class="d-inline mark-read-form">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-secondary">
+                                                <i class="fas fa-check me-1"></i> Marquer comme lu
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    
+                                    <form action="{% url 'notifications:supprimer' notification.id %}" method="post" class="d-inline delete-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash-alt me-1"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if notifications.has_other_pages %}
+                <nav aria-label="Pagination des notifications" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if notifications.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.previous_page_number }}" aria-label="Précédent">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true" aria-label="Précédent">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for i in notifications.paginator.page_range %}
+                            {% if notifications.number == i %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">
+                                        {{ i }}
+                                        <span class="sr-only">(current)</span>
+                                    </span>
+                                </li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if notifications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ notifications.next_page_number }}" aria-label="Suivant">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true" aria-label="Suivant">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <h3 class="h4 mb-3">Aucune notification</h3>
+                    <p class="text-muted">Vous n'avez pas de notifications pour le moment.</p>
+                    <p class="text-muted">Les notifications apparaîtront ici quand vous recevrez des mises à jour sur les matchs, tournois ou invitations.</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary mt-3 px-4 py-2">
+                        <i class="fas fa-home me-2"></i> Retourner à l'accueil
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Notification Settings Panel -->
+<div class="notification-settings">
+    <div class="settings-toggle" id="settingsToggle">
+        <i class="fas fa-cog"></i>
+    </div>
+    <div class="settings-panel" id="settingsPanel">
+        <h4><i class="fas fa-bell me-2"></i>Préférences de notifications</h4>
+        <div class="setting-item">
+            <span>Notifications sonores</span>
+            <label class="custom-switch">
+                <input type="checkbox" id="soundToggle" checked>
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <span>Notifications de matchs</span>
+            <label class="custom-switch">
+                <input type="checkbox" id="matchToggle" checked>
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <span>Notifications de tournois</span>
+            <label class="custom-switch">
+                <input type="checkbox" id="tournoiToggle" checked>
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <span>Notifications d'équipe</span>
+            <label class="custom-switch">
+                <input type="checkbox" id="equipeToggle" checked>
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <span>Notifications de résultats</span>
+            <label class="custom-switch">
+                <input type="checkbox" id="resultatToggle" checked>
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <button class="btn btn-primary w-100 mt-3" id="saveSettings">
+            <i class="fas fa-save me-2"></i>Enregistrer
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const notificationsContainer = document.getElementById('notificationsContainer');
+        const newNotificationsAlert = document.getElementById('newNotificationsAlert');
+        const filterOptions = document.querySelectorAll('.filter-option');
+        const searchInput = document.getElementById('searchNotifications');
+        const searchButton = document.getElementById('searchButton');
+        const deleteAllBtn = document.getElementById('deleteAllBtn');
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const saveSettingsBtn = document.getElementById('saveSettings');
+        
+        // Notification counts
+        const notificationCards = document.querySelectorAll('.notification-card');
+        updateFilterCounts();
+        
+        // Filter functionality
+        filterOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const filterType = this.dataset.filter;
+                
+                // Update active state
+                filterOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Filter notifications
+                notificationCards.forEach(card => {
+                    const type = card.dataset.type;
+                    const isUnread = card.classList.contains('unread');
+                    
+                    if (filterType === 'all' || 
+                        (filterType === 'unread' && isUnread) ||
+                        (filterType === type)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Search functionality
+        searchButton.addEventListener('click', searchNotifications);
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                searchNotifications();
+            }
+        });
+        
+        function searchNotifications() {
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            if (!searchTerm) {
+                notificationCards.forEach(card => card.style.display = '');
+                return;
+            }
+            
+            notificationCards.forEach(card => {
+                const title = card.querySelector('h5').textContent.toLowerCase();
+                const message = card.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || message.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // AJAX for marking a notification as read
+        document.querySelectorAll('.mark-read-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const notificationCard = form.closest('.notification-card');
+                
+                notificationCard.classList.add('reading');
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove unread class and the form
+                        notificationCard.classList.remove('unread');
+                        form.remove();
+                        
+                        // Update notification counter in navbar if exists
+                        const navbarCounter = document.querySelector('.notification-badge');
+                        if (navbarCounter) {
+                            const currentCount = parseInt(navbarCounter.textContent);
+                            const newCount = Math.max(0, currentCount - 1);
+                            navbarCounter.textContent = newCount;
+                            if (newCount === 0) {
+                                navbarCounter.style.display = 'none';
+                            }
+                        }
+                        
+                        // Update filter counts
+                        updateFilterCounts();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+        
+        // AJAX for marking all notifications as read
+        const markAllReadForm = document.getElementById('mark-all-read-form');
+        if (markAllReadForm) {
+            markAllReadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(markAllReadForm);
+                
+                fetch(markAllReadForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mark all notifications as read visually
+                        document.querySelectorAll('.notification-card.unread').forEach(card => {
+                            card.classList.remove('unread');
+                            card.classList.add('reading');
+                        });
+                        
+                        // Remove all mark as read buttons
+                        document.querySelectorAll('.mark-read-form').forEach(form => {
+                            form.remove();
+                        });
+                        
+                        // Update notification counter in navbar if exists
+                        const navbarCounter = document.querySelector('.notification-badge');
+                        if (navbarCounter) {
+                            navbarCounter.textContent = '0';
+                            navbarCounter.style.display = 'none';
+                        }
+                        
+                        // Show success message
+                        showToast('Toutes les notifications ont été marquées comme lues.');
+                        
+                        // Update filter counts
+                        updateFilterCounts();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+        
+        // AJAX for deleting a notification
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const notificationCard = form.closest('.notification-card');
+                
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            notificationCard.style.opacity = 0;
+                            setTimeout(() => {
+                                notificationCard.remove();
+                                
+                                // Update filter counts
+                                updateFilterCounts();
+                                
+                                // If it was the last notification, reload to show empty state
+                                if (document.querySelectorAll('.notification-card').length === 0) {
+                                    location.reload();
+                                }
+                            }, 300);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        });
+        
+        // Delete all notifications
+        if (deleteAllBtn) {
+            deleteAllBtn.addEventListener('click', function() {
+                if (confirm('Êtes-vous sûr de vouloir supprimer toutes les notifications ?')) {
+                    // Simulate deleting all notifications (in a real app, you'd make an API call)
+                    document.querySelectorAll('.notification-card').forEach(card => {
+                        card.style.opacity = 0;
+                    });
+                    
+                    setTimeout(() => {
+                        notificationsContainer.innerHTML = `
+                            <div class="card shadow-sm border-0 rounded-4">
+                                <div class="card-body empty-state">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <h3 class="h4 mb-3">Aucune notification</h3>
+                                    <p class="text-muted">Vous n'avez pas de notifications pour le moment.</p>
+                                    <p class="text-muted">Les notifications apparaîtront ici quand vous recevrez des mises à jour sur les matchs, tournois ou invitations.</p>
+                                    <a href="{% url 'home' %}" class="btn btn-primary mt-3 px-4 py-2">
+                                        <i class="fas fa-home me-2"></i> Retourner à l'accueil
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Update notification counter in navbar if exists
+                        const navbarCounter = document.querySelector('.notification-badge');
+                        if (navbarCounter) {
+                            navbarCounter.textContent = '0';
+                            navbarCounter.style.display = 'none';
+                        }
+                        
+                        showToast('Toutes les notifications ont été supprimées.');
+                    }, 300);
+                }
+            });
+        }
+        
+        // Settings panel
+        settingsToggle.addEventListener('click', function() {
+            settingsPanel.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) {
+                settingsPanel.classList.remove('show');
+            }
+        });
+        
+        saveSettingsBtn.addEventListener('click', function() {
+            // Save settings to localStorage
+            const settings = {
+                sound: document.getElementById('soundToggle').checked,
+                match: document.getElementById('matchToggle').checked,
+                tournoi: document.getElementById('tournoiToggle').checked,
+                equipe: document.getElementById('equipeToggle').checked,
+                resultat: document.getElementById('resultatToggle').checked
+            };
+            
+            localStorage.setItem('notificationSettings', JSON.stringify(settings));
+            showToast('Préférences enregistrées');
+            settingsPanel.classList.remove('show');
+        });
+        
+        // Initialize settings from localStorage
+        initializeSettings();
+        
+        function initializeSettings() {
+            const savedSettings = localStorage.getItem('notificationSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                document.getElementById('soundToggle').checked = settings.sound;
+                document.getElementById('matchToggle').checked = settings.match;
+                document.getElementById('tournoiToggle').checked = settings.tournoi;
+                document.getElementById('equipeToggle').checked = settings.equipe;
+                document.getElementById('resultatToggle').checked = settings.resultat;
+            }
+        }
+        
+        // Real-time notifications check (simulated)
+        // In a real app, you'd use WebSockets or polling to check for new notifications
+        function checkForNewNotifications() {
+            // Simulate receiving new notifications (in a real app, this would be a server push or API call)
+            setTimeout(() => {
+                // Show new notifications alert
+                newNotificationsAlert.classList.add('show');
+                
+                // Clicking the alert would reload or add the new notifications
+                newNotificationsAlert.addEventListener('click', function() {
+                    location.reload(); // Simple reload approach
+                    // In a real app, you'd fetch and append new notifications
+                });
+                
+                // Play sound notification if enabled
+                const settings = JSON.parse(localStorage.getItem('notificationSettings') || '{"sound":true}');
+                if (settings.sound) {
+                    playNotificationSound();
+                }
+            }, 30000); // Check every 30 seconds
+        }
+        
+        // Start checking for notifications (commented out for demo)
+        // checkForNewNotifications();
+        
+        function playNotificationSound() {
+            // Create an audio element and play a sound
+            const audio = new Audio('/static/sounds/notification.mp3');
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+        
+        function showToast(message) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-primary border-0';
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-check-circle me-2"></i>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            // Create toast container if it doesn't exist
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Add toast to container
+            toastContainer.appendChild(toast);
+            
+            // Initialize Bootstrap toast and show it
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+        
+        function updateFilterCounts() {
+            // Count all notifications by type
+            const counts = {
+                all: notificationCards.length,
+                unread: 0,
+                info: 0,
+                match_amical: 0,
+                tournoi: 0,
+                equipe: 0,
+                resultat: 0
+            };
+            
+            notificationCards.forEach(card => {
+                const type = card.dataset.type;
+                counts[type] = (counts[type] || 0) + 1;
+                
+                if (card.classList.contains('unread')) {
+                    counts.unread++;
+                }
+            });
+            
+            // Update filter badges
+            Object.keys(counts).forEach(key => {
+                const countBadge = document.getElementById(`count-${key}`);
+                if (countBadge) {
+                    countBadge.textContent = counts[key];
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

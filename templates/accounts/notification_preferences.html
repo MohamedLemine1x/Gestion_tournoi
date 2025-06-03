@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} | TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pref-card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    .pref-card:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+    .pref-card .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .pref-card .card-header h5 {
+        font-weight: 600;
+    }
+    .pref-card .card-footer {
+        border-radius: 0 0 15px 15px !important;
+    }
+    .form-check-input:checked {
+        background-color: #4a69bd;
+        border-color: #4a69bd;
+    }
+    .form-switch .form-check-input:focus {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%2813, 110, 253, 0.25%29'/%3e%3c/svg%3e");
+    }
+    .form-switch .form-check-input:checked {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    }
+    .pref-type-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 15px;
+        font-size: 1.5rem;
+    }
+    .notification-badge.test {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-left: 10px;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    .notification-badge.test.active {
+        opacity: 1;
+    }
+    #sound-test-btn:hover {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Titre et description -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="mb-2">{{ page_title }}</h1>
+            <p class="text-muted">Personnalisez comment et quand vous souhaitez recevoir des notifications.</p>
+        </div>
+    </div>
+    
+    <!-- Formulaire de préférences -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="row g-4">
+            <!-- Préférences générales -->
+            <div class="col-md-6">
+                <div class="card pref-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Paramètres généraux</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="enable_all" name="enable_all" {% if preferences.enable_all %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="enable_all">Activer toutes les notifications</label>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                Ce paramètre contrôle globalement toutes les notifications. Désactivez-le pour suspendre temporairement les notifications.
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="sound_enabled" name="sound_enabled" {% if preferences.sound_enabled %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="sound_enabled">Activer les sons de notification</label>
+                                </div>
+                                <span id="sound-test-btn" class="ms-2 text-primary" title="Tester le son">
+                                    <i class="fas fa-play-circle"></i>
+                                </span>
+                                <span class="notification-badge test">1</span>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                Contrôle les alertes sonores lorsque vous recevez de nouvelles notifications.
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="email_delivery" name="email_delivery" {% if preferences.email_delivery %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="email_delivery">Recevoir par email</label>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                Envoyer les notifications importantes à votre adresse email.
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="push_delivery" name="push_delivery" {% if preferences.push_delivery %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="push_delivery">Notifications push</label>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                Recevoir des alertes push sur votre appareil mobile (nécessite l'application mobile).
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Préférences par type -->
+            <div class="col-md-6">
+                <div class="card pref-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Types de notifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-4">Sélectionnez les types de notifications que vous souhaitez recevoir :</p>
+                        
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="pref-type-icon bg-success text-white">
+                                <i class="fas fa-futbol"></i>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="match_notifications" name="match_notifications" {% if preferences.match_notifications %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="match_notifications">Matchs amicaux</label>
+                                </div>
+                                <small class="text-muted">Invitation à des matchs amicaux, rappels et mises à jour</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="pref-type-icon bg-danger text-white">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="tournament_notifications" name="tournament_notifications" {% if preferences.tournament_notifications %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="tournament_notifications">Tournois</label>
+                                </div>
+                                <small class="text-muted">Nouveaux tournois, inscriptions, planning et modifications</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="pref-type-icon bg-warning text-white">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="team_notifications" name="team_notifications" {% if preferences.team_notifications %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="team_notifications">Équipes</label>
+                                </div>
+                                <small class="text-muted">Invitation à rejoindre une équipe, messages d'équipe</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="pref-type-icon bg-info text-white">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="result_notifications" name="result_notifications" {% if preferences.result_notifications %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="result_notifications">Résultats</label>
+                                </div>
+                                <small class="text-muted">Résultats des matchs, évolution du classement</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Préférences de résumés -->
+            <div class="col-12">
+                <div class="card pref-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-envelope me-2"></i>Résumé des notifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="digest_enabled" name="digest_enabled" {% if preferences.digest_enabled %}checked{% endif %}>
+                                    <label class="form-check-label fw-semibold" for="digest_enabled">Activer le résumé des notifications</label>
+                                </div>
+                                <small class="text-muted d-block mt-2 mb-4">
+                                    Recevez un récapitulatif des notifications au lieu de notifications individuelles.
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="digest_frequency" class="form-label fw-semibold">Fréquence du résumé</label>
+                                    <select class="form-select" id="digest_frequency" name="digest_frequency" {% if not preferences.digest_enabled %}disabled{% endif %}>
+                                        <option value="daily" {% if preferences.digest_frequency == 'daily' %}selected{% endif %}>Quotidien</option>
+                                        <option value="weekly" {% if preferences.digest_frequency == 'weekly' %}selected{% endif %}>Hebdomadaire</option>
+                                    </select>
+                                    <small class="text-muted">À quelle fréquence souhaitez-vous recevoir le résumé ?</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Enregistrer les préférences
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de l'activation/désactivation des sous-options
+    const enableAllCheckbox = document.getElementById('enable_all');
+    const digestEnabledCheckbox = document.getElementById('digest_enabled');
+    const digestFrequencySelect = document.getElementById('digest_frequency');
+    
+    enableAllCheckbox.addEventListener('change', function() {
+        const subOptions = document.querySelectorAll('input[type="checkbox"]:not(#enable_all)');
+        subOptions.forEach(checkbox => {
+            checkbox.disabled = !this.checked;
+        });
+        digestFrequencySelect.disabled = !this.checked || !digestEnabledCheckbox.checked;
+    });
+    
+    digestEnabledCheckbox.addEventListener('change', function() {
+        digestFrequencySelect.disabled = !this.checked;
+    });
+    
+    // Test du son de notification
+    const soundTestBtn = document.getElementById('sound-test-btn');
+    const notificationBadge = document.querySelector('.notification-badge.test');
+    const notificationSound = new Audio('/static/sounds/notification.mp3');
+    
+    soundTestBtn.addEventListener('click', function() {
+        if (document.getElementById('sound_enabled').checked) {
+            notificationSound.play().catch(e => console.error('Erreur lors de la lecture du son:', e));
+            notificationBadge.classList.add('active');
+            
+            setTimeout(() => {
+                notificationBadge.classList.remove('active');
+            }, 3000);
+        }
+    });
+});
+</script>
+{% endblock %} 

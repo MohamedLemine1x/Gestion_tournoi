@@ -1,0 +1,15 @@
+{% autoescape off %}
+Bonjour {{ user.get_username }},
+
+Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :
+
+<a href="{{ reset_url }}">
+Réinitialiser mon mot de passe
+</a>
+
+Si vous n’avez pas demandé de réinitialisation de mot de passe, ignorez cet e-mail.
+Si le lien ne fonctionne pas, veuillez copier et coller l'URL suivante dans votre navigateur :
+{{ reset_url }}
+Cordialement,  
+L'équipe {{ site_name }}
+{% endautoescape %}

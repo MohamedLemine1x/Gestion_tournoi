@@ -1,0 +1,737 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+
+{% block title %}Connexion - TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Variables CSS optimisées */
+:root {
+  --primary-color: #1a73e8;
+  --primary-dark: #0d47a1;
+  --secondary-color: #28a745;
+  --secondary-dark: #1e7e34;
+  --text-color: #495057;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --border-radius: 10px;
+  --transition: 0.3s ease;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --gradient: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+}
+
+/* Reset et base */
+.login-section {
+  padding: 5rem 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(40,167,69,0.05) 0%, rgba(26,115,232,0.1) 100%);
+  position: relative;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.login-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--gradient);
+}
+
+/* Navigation simplifiée pour les pages de connexion/inscription */
+.auth-navbar {
+  padding: 15px 0;
+  background-color: #fff;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 100;
+}
+
+.auth-navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-navbar .brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.auth-navbar .brand i {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.auth-navbar .brand-text {
+  font-weight: 700;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+}
+
+.auth-navbar .home-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  background: #fff;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.auth-navbar .home-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-navbar .home-btn i {
+  margin-right: 8px;
+}
+
+/* Card principal */
+.auth-card {
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  transition: transform var(--transition), box-shadow var(--transition);
+  border-top: 4px solid var(--secondary-color);
+  margin-bottom: 30px;
+  animation: slideUpIn 0.5s ease-out;
+}
+
+@keyframes slideUpIn {
+  from { 
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.auth-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+}
+
+/* En-tête et pied de page */
+.auth-header, .auth-footer {
+  padding: 1.5rem;
+  text-align: center;
+  background: linear-gradient(to right, rgba(26,115,232,0.03), rgba(40,167,69,0.05));
+}
+
+.auth-header {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.auth-footer {
+  border-top: 1px solid #e9ecef;
+}
+
+.auth-header h2 {
+  margin-bottom: 10px;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+}
+
+.auth-header h2::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 50px;
+  height: 3px;
+  background: var(--gradient);
+  transform: translateX(-50%);
+}
+
+.auth-body {
+  padding: 2rem;
+}
+
+/* Formulaires */
+.form-floating .form-control {
+  height: calc(3.5rem + 2px);
+  border: 2px solid #e9ecef;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-floating .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(26, 115, 232, 0.1);
+}
+
+/* Champs de mot de passe - Solution optimisée */
+.password-field {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 16px;
+  z-index: 20;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.password-toggle:focus {
+  outline: none;
+}
+
+/* Désactiver toutes les icônes de validation par défaut */
+.form-control:valid,
+.form-control:invalid {
+  background-image: none !important;
+}
+
+/* S'assurer que le texte ne chevauche pas l'icône */
+.form-floating .form-control,
+.form-control {
+  padding-right: 45px !important;
+}
+
+/* Donner une taille fixe à l'icône pour plus de cohérence */
+.password-toggle i {
+  font-size: 18px;
+}
+
+/* Bouton principal */
+.btn-primary {
+  background: linear-gradient(to right, var(--primary-color), #0056b3);
+  border: none;
+  padding: 14px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition);
+  border-radius: var(--border-radius);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #0056b3, var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(100, 100);
+    opacity: 0;
+  }
+}
+
+.btn-primary:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+/* Badge de sécurité stylisé */
+.security-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 50px;
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+  margin-top: 15px;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  transition: all 0.3s ease;
+}
+
+.security-badge:hover {
+  background-color: rgba(40, 167, 69, 0.15);
+  transform: translateY(-2px);
+}
+
+.security-badge i {
+  margin-right: 6px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+  }
+  70% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.95);
+  }
+}
+
+/* Liens de support stylisés */
+.support-links {
+  margin-top: 20px;
+}
+
+.support-links a {
+  color: var(--text-color);
+  margin: 0 10px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all var(--transition);
+  padding: 5px 10px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.support-links a:hover {
+  color: var(--primary-color);
+  background-color: rgba(26, 115, 232, 0.05);
+  transform: translateY(-2px);
+}
+
+.support-links a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--primary-color);
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+.support-links a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Style des cases à cocher et liens */
+.form-check-input {
+  width: 1.2em;
+  height: 1.2em;
+  border: 2px solid #ddd;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  animation: checkboxPulse 0.3s ease-in-out;
+}
+
+@keyframes checkboxPulse {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.form-check-label:hover {
+  color: var(--primary-color);
+}
+
+.form-check-label a, .auth-footer a, .auth-body a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.form-check-label a:hover, .auth-footer a:hover, .auth-body a:hover {
+  color: var(--primary-dark);
+}
+
+.form-check-label a::after, .auth-footer a::after, .auth-body a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--primary-color);
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+.form-check-label a:hover::after, .auth-footer a:hover::after, .auth-body a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Alerte d'information avec effet d'attention */
+.alert-info {
+  border-left: 4px solid var(--primary-color);
+  background-color: rgba(26, 115, 232, 0.05);
+  animation: alertPulse 2s infinite;
+}
+
+@keyframes alertPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(26, 115, 232, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(26, 115, 232, 0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .auth-body {
+    padding: 1.25rem;
+  }
+  
+  .auth-header, .auth-footer {
+    padding: 1rem;
+  }
+  
+  .login-section {
+    padding: 2.5rem 0;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Navigation simplifiée - Removing this section to prevent duplicate headers -->
+{% comment %}
+<div class="auth-navbar">
+  <div class="container">
+    <a href="/" class="brand">
+      <i class="fas fa-futbol"></i>
+      <span class="brand-text">TournoiPRO</span>
+    </a>
+    <a href="/" class="home-btn">
+      <i class="fas fa-home"></i> Retour à l'accueil
+    </a>
+  </div>
+</div>
+{% endcomment %}
+
+<section class="login-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h2>
+              <i class="fas fa-sign-in-alt me-2"></i>
+              Connexion
+            </h2>
+            <p class="mb-0 text-muted">Accédez à votre compte TournoiPRO</p>
+          </div>
+
+          <div class="auth-body">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+            
+            <form method="post" action="{% url 'accounts:login' %}" class="needs-validation" novalidate>
+              {% csrf_token %}
+              
+              {% if next %}
+              <input type="hidden" name="next" value="{{ next }}">
+              <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                Vous devez vous connecter pour accéder à la page demandée.
+              </div>
+              {% endif %}
+
+              {% if form.non_field_errors %}
+              <div class="alert alert-danger mb-3">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {% for error in form.non_field_errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+              {% endif %}
+              
+              <!-- Email Field -->
+              <div class="form-floating mb-4">
+                {{ form.username|add_class:"form-control"|attr:"placeholder:Email"|attr:"autocomplete:email" }}
+                <label for="{{ form.username.id_for_label }}">Email</label>
+                {% if form.username.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.username.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              
+              <!-- Password Field -->
+              <div class="form-floating mb-4 password-field">
+                {{ form.password|add_class:"form-control"|attr:"placeholder:Mot de passe"|attr:"autocomplete:current-password" }}
+                <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                <button type="button" class="password-toggle" aria-label="Afficher/masquer le mot de passe">
+                  <i class="far fa-eye"></i>
+                </button>
+                {% if form.password.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.password.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              
+              <!-- Remember Me Checkbox -->
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                  {{ form.remember|add_class:"form-check-input" }}
+                  <label class="form-check-label" for="{{ form.remember.id_for_label }}">
+                    Se souvenir de moi
+                  </label>
+                </div>
+                <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none">
+                  Mot de passe oublié ?
+                </a>
+              </div>
+              
+              <!-- Form Submission -->
+              <div class="d-grid gap-2 mb-3">
+                <button type="submit" class="btn btn-primary" id="login-btn">
+                  <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                </button>
+              </div>
+              
+              <div class="text-center">
+                <p class="mb-0">
+                  Pas encore de compte ? 
+                  <a href="{% url 'accounts:register' %}" class="text-decoration-none fw-semibold">
+                    Créer un compte
+                  </a>
+                </p>
+              </div>
+              
+              <!-- Security Badge -->
+              <div class="text-center mt-4">
+                <span class="security-badge">
+                  <i class="fas fa-lock me-1"></i> Connexion sécurisée
+                </span>
+              </div>
+            </form>
+          </div>
+          
+         
+        
+        <!-- Liens de support -->
+        <div class="support-links text-center mt-4">
+          <a href="#"><i class="fas fa-question-circle me-1"></i> Aide</a>
+          <a href="#"><i class="fas fa-headset me-1"></i> Support</a>
+          <a href="/terms/"><i class="fas fa-file-contract me-1"></i> Conditions</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Gestion visibilité mot de passe
+  document.querySelectorAll('.password-toggle').forEach(function(toggle) {
+    toggle.addEventListener('click', function() {
+      const input = this.closest('.password-field').querySelector('input');
+      const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+      input.setAttribute('type', type);
+      
+      const icon = this.querySelector('i');
+      icon.classList.toggle('fa-eye');
+      icon.classList.toggle('fa-eye-slash');
+      
+      input.focus();
+    });
+  });
+  
+  // Effets de ripple pour le bouton
+  document.querySelectorAll('.btn-primary').forEach(function(button) {
+    button.addEventListener('mousedown', function(e) {
+      const x = e.clientX - e.target.getBoundingClientRect().left;
+      const y = e.clientY - e.target.getBoundingClientRect().top;
+      
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      this.appendChild(ripple);
+      
+      setTimeout(function() {
+        ripple.remove();
+      }, 600);
+    });
+  });
+  
+  // Validation du formulaire
+  const form = document.querySelector('form');
+  const loginBtn = document.getElementById('login-btn');
+  
+  if (form) {
+    // Focus sur le premier champ du formulaire
+    setTimeout(() => {
+      const firstInput = form.querySelector('input:not([type="hidden"])');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 100);
+    
+    // Empêcher la soumission multiple
+    form.addEventListener('submit', function(event) {
+      if (!this.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Mettre en évidence les champs manquants
+        this.querySelectorAll('input:invalid').forEach(function(input) {
+          input.classList.add('shake-error');
+          setTimeout(function() {
+            input.classList.remove('shake-error');
+          }, 500);
+        });
+      } else if (loginBtn) {
+        // Désactiver le bouton et montrer l'état de chargement
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Connexion...';
+      }
+      
+      this.classList.add('was-validated');
+    });
+  }
+  
+  // Auto-fermeture des alertes
+  document.querySelectorAll('.alert:not(.alert-info)').forEach(function(alert) {
+    setTimeout(function() {
+      alert.style.transition = 'opacity 0.5s ease';
+      alert.style.opacity = '0';
+      
+      setTimeout(function() {
+        const closeBtn = alert.querySelector('.btn-close');
+        if (closeBtn) closeBtn.click();
+      }, 500);
+    }, 5000);
+  });
+  
+  // Animation lors du scroll
+  function revealOnScroll() {
+    const elements = document.querySelectorAll('.form-floating, .btn-primary, .form-check');
+    
+    elements.forEach(function(element) {
+      const elementTop = element.getBoundingClientRect().top;
+      const elementVisible = 150;
+      
+      if (elementTop < window.innerHeight - elementVisible) {
+        element.classList.add('visible');
+      }
+    });
+  }
+  
+  window.addEventListener('scroll', revealOnScroll);
+  revealOnScroll(); // Déclencher au chargement initial
+});
+</script>
+
+<style>
+/* Styles supplémentaires pour les animations */
+@keyframes shake-error {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.shake-error {
+  animation: shake-error 0.3s ease-in-out;
+  border-color: #dc3545 !important;
+}
+
+.form-floating, .btn-primary, .form-check {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.form-floating.visible, .btn-primary.visible, .form-check.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: rippleEffect 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+</style>
+{% endblock %}

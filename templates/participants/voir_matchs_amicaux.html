@@ -1,0 +1,555 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Matchs Amicaux - {{ equipe.nom }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Variables CSS */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-500: #6c757d;
+    --gray-700: #495057;
+    --gray-900: #212529;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --transition: all 0.2s ease;
+}
+
+/* Layout et composants communs */
+.page-header {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.page-icon {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.page-title-group {
+    flex-grow: 1;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-subtitle {
+    color: var(--gray-500);
+    font-size: 16px;
+    margin: 0;
+}
+
+.card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 25px;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background: var(--gray-100);
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+/* Liste des matchs */
+.match-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+}
+
+.match-card:hover {
+    transform: translateY(-3px);
+}
+
+.match-header {
+    background-color: var(--gray-100);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.match-date {
+    color: var(--gray-500);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.match-status {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-upcoming {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.status-completed {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.match-body {
+    padding: 20px;
+    background-color: white;
+}
+
+.teams-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 40%;
+}
+
+.team-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gray-300);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--gray-100);
+}
+
+.team-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.team-role {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+}
+
+.vs-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vs {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+}
+
+.score {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.score-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    width: 40px;
+    text-align: center;
+}
+
+.score-separator {
+    font-size: 1.4rem;
+    color: var(--gray-400);
+    margin: 0 5px;
+}
+
+.match-footer {
+    background-color: var(--gray-100);
+    padding: 15px 20px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.match-venue {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+}
+
+.badge.victoire {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge.nul {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge.defaite {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* État vide */
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--gray-500);
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    color: var(--gray-300);
+    opacity: 0.7;
+}
+
+.empty-state h3 {
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: var(--gray-700);
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin-bottom: 25px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+/* Boutons de navigation */
+.nav-buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    color: white;
+}
+
+.btn-outline-secondary {
+    background-color: transparent;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--gray-200);
+    color: var(--gray-900);
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+    
+    .teams-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .team {
+        width: 100%;
+    }
+    
+    .vs-container {
+        margin: 15px 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if breadcrumbs %}
+    {% include 'breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+{% endif %}
+
+    <div class="page-header">
+        <div class="page-icon">
+            <i class="fas fa-futbol"></i>
+        </div>
+        <div class="page-title-group">
+            <h1 class="page-title">Matchs Amicaux - {{ equipe.nom }}</h1>
+            <p class="page-subtitle">Suivez les matchs amicaux de votre équipe</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Matchs à venir -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title"><i class="fas fa-calendar-alt me-2"></i>Matchs Amicaux à Venir</h5>
+        </div>
+        <div class="card-body">
+            {% if matchs_a_venir %}
+                <div class="row">
+                    {% for match in matchs_a_venir %}
+                        <div class="col-md-6">
+                            <div class="match-card">
+                                <div class="match-header">
+                                    <div class="match-date">
+                                        <i class="far fa-calendar-alt"></i> {{ match.date|date:"d/m/Y à H:i" }}
+                                    </div>
+                                    <span class="match-status status-upcoming">À venir</span>
+                                </div>
+                                <div class="match-body">
+                                    <div class="teams-container">
+                                        <div class="team">
+                                            {% if match.equipe_a.logo %}
+                                                <img src="{{ match.equipe_a.logo.url }}" alt="{{ match.equipe_a.nom }}" class="team-logo">
+                                            {% else %}
+                                                <div class="team-logo"><i class="fas fa-shield-alt"></i></div>
+                                            {% endif %}
+                                            <div class="team-name">{{ match.equipe_a.nom }}</div>
+                                            <div class="team-role">Domicile</div>
+                                        </div>
+                                        <div class="vs-container">
+                                            <div class="vs">VS</div>
+                                        </div>
+                                        <div class="team">
+                                            {% if match.equipe_b.logo %}
+                                                <img src="{{ match.equipe_b.logo.url }}" alt="{{ match.equipe_b.nom }}" class="team-logo">
+                                            {% else %}
+                                                <div class="team-logo"><i class="fas fa-shield-alt"></i></div>
+                                            {% endif %}
+                                            <div class="team-name">{{ match.equipe_b.nom }}</div>
+                                            <div class="team-role">Extérieur</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if match.lieu %}
+                                <div class="match-footer">
+                                    <div class="match-venue">
+                                        <i class="fas fa-map-marker-alt me-1"></i> {{ match.lieu }}
+                                    </div>
+                                    <a href="{% url 'matchs:detail' match.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-info-circle me-1"></i> Détails
+                                    </a>
+                                </div>
+                                {% else %}
+                                <div class="match-footer">
+                                    <div class="match-venue">
+                                        <i class="fas fa-map-marker-alt me-1"></i> Lieu non défini
+                                    </div>
+                                    <a href="{% url 'matchs:detail' match.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-info-circle me-1"></i> Détails
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                    <h3>Aucun match amical à venir</h3>
+                    <p>Il n'y a pas de matchs amicaux prévus pour le moment.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Matchs passés / Résultats -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title"><i class="fas fa-history me-2"></i>Résultats des Matchs Amicaux</h5>
+        </div>
+        <div class="card-body">
+            {% if resultats_matchs %}
+                <div class="row">
+                    {% for match_data in resultats_matchs %}
+                        <div class="col-md-6">
+                            <div class="match-card">
+                                <div class="match-header">
+                                    <div class="match-date">
+                                        <i class="far fa-calendar-alt"></i> {{ match_data.match.date|date:"d/m/Y" }}
+                                    </div>
+                                    {% if match_data.match.termine %}
+                                        <span class="match-status status-completed">Terminé</span>
+                                    {% else %}
+                                        <span class="match-status status-upcoming">En attente du score</span>
+                                    {% endif %}
+                                </div>
+                                <div class="match-body">
+                                    <div class="teams-container">
+                                        <div class="team">
+                                            {% if match_data.match.equipe_a.logo %}
+                                                <img src="{{ match_data.match.equipe_a.logo.url }}" alt="{{ match_data.match.equipe_a.nom }}" class="team-logo">
+                                            {% else %}
+                                                <div class="team-logo"><i class="fas fa-shield-alt"></i></div>
+                                            {% endif %}
+                                            <div class="team-name">{{ match_data.match.equipe_a.nom }}</div>
+                                            <div class="team-role">Domicile</div>
+                                        </div>
+                                        <div class="vs-container">
+                                            {% if match_data.match.termine and match_data.match.score_equipe_a is not None and match_data.match.score_equipe_b is not None %}
+                                                <div class="score">
+                                                    <span class="score-number">{{ match_data.match.score_equipe_a }}</span>
+                                                    <span class="score-separator">-</span>
+                                                    <span class="score-number">{{ match_data.match.score_equipe_b }}</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="vs">VS</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="team">
+                                            {% if match_data.match.equipe_b.logo %}
+                                                <img src="{{ match_data.match.equipe_b.logo.url }}" alt="{{ match_data.match.equipe_b.nom }}" class="team-logo">
+                                            {% else %}
+                                                <div class="team-logo"><i class="fas fa-shield-alt"></i></div>
+                                            {% endif %}
+                                            <div class="team-name">{{ match_data.match.equipe_b.nom }}</div>
+                                            <div class="team-role">Extérieur</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="match-footer">
+                                    {% if match_data.resultat %}
+                                        <span class="badge {{ match_data.resultat|lower }}">{{ match_data.resultat }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Résultat non disponible</span>
+                                    {% endif %}
+                                    <a href="{% url 'matchs:detail' match_data.match.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-info-circle me-1"></i> Détails
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Aucun match amical passé</h3>
+                    <p>Votre équipe n'a pas encore disputé de matchs amicaux.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <a href="{% url 'participants:voir_calendrier_resultats_participant' equipe.id %}" class="btn btn-primary">
+            <i class="fas fa-calendar-week me-1"></i> Voir les matchs de tournoi
+        </a>
+        <a href="{% url 'participants:tableau_bord' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Retour à mon espace
+        </a>
+    </div>
+</div>
+{% endblock %} 

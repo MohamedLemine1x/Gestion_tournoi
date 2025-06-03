@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmer suppression équipe{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0"><i class="fas fa-trash-alt me-2"></i>Confirmer la suppression de l'équipe</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-center mb-4">
+                        Êtes-vous sûr de vouloir supprimer définitivement l'équipe <strong>"{{ equipe.nom }}"</strong> ?
+                    </p>
+                    
+                    <div class="alert alert-warning" role="alert">
+                        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Attention !</h5>
+                        <p>Cette action est **IRRÉVERSIBLE**. Toutes les données associées à cette équipe seront perdues, y compris :</p>
+                        <ul>
+                            <li>Les informations de l'équipe (description, logo)</li>
+                            <li>Les {{ membres_count }} membres de l'équipe</li>
+                            <li>Son historique de participation aux tournois (si applicable)</li>
+                        </ul>
+                        <hr>
+                        <p class="mb-0">Veuillez vous assurer d'avoir sauvegardé toute information importante avant de continuer.</p>
+                    </div>
+
+                    <p class="text-center mt-4">
+                        Pour confirmer la suppression, cliquez sur le bouton "Supprimer l'équipe".
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash-alt me-2"></i>Supprimer l'équipe
+                            </button>
+                            <a href="{% url 'equipes:gestion_equipe' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

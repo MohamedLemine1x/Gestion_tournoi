@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ equipe.nom }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+}
+
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #0072ff, #00c6ff);
+    color: white;
+}
+
+.hover-card {
+    transition: all 0.3s ease;
+    border-radius: 16px;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.member-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.member-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    background-color: #f0f4f8 !important;
+}
+
+.info-item {
+    transition: all 0.2s ease;
+}
+
+.info-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bg-primary-light {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.position-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.position-btn {
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Breadcrumb moderne -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-light rounded-pill px-3 py-2 shadow-sm">
+            <li class="breadcrumb-item">
+                <a href="{% url 'equipes:liste_equipes' %}" class="text-decoration-none">
+                    <i class="fas fa-users me-1"></i>Équipes
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ equipe.nom }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Header avec actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-gradient-blue shadow rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="team-icon me-3">
+                                {% if equipe.logo %}
+                                    <img src="{{ equipe.logo.url }}" alt="Logo {{ equipe.nom }}" 
+                                         class="rounded-circle border border-3 border-white shadow" style="width: 80px; height: 80px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-gradient-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" 
+                                         style="width: 80px; height: 80px;">
+                                        <i class="fas fa-users fa-2x"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h1 class="mb-1 fw-bold text-white">{{ equipe.nom }}</h1>
+                                <p class="text-light mb-0">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    {{ equipe.responsable.user.get_full_name|default:equipe.responsable.user.username }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 flex-wrap">
+                            <!-- Bouton Dashboard -->
+                            <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-light">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                            
+                            {% if est_responsable %}
+                                <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-info">
+                                    <i class="fas fa-chart-line me-2"></i>Tableau de bord
+                                </a>
+                                <a href="{% url 'equipes:gestion_equipe' %}" class="btn btn-primary">
+                                    <i class="fas fa-cog me-2"></i>Gérer l'équipe
+                                </a>
+                                <!-- Bouton pour ouvrir le modal d'ajout manuel -->
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ajoutRapideModal">
+                                    <i class="fas fa-user-plus me-2"></i>Ajouter un membre
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistiques rapides -->
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 rounded-4 hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="icon-circle bg-primary-light text-primary mb-3 mx-auto">
+                        <i class="fas fa-users fa-lg"></i>
+                    </div>
+                    <h3 class="fw-bold text-primary mb-1">{{ membres.count }}</h3>
+                    <p class="text-muted small mb-0">Membres</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Informations de l'équipe -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100 rounded-4 hover-card">
+                <div class="card-header bg-white border-bottom-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>Informations
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Logo de l'équipe -->
+                    <div class="text-center mb-4">
+                        {% if equipe.logo %}
+                            <img src="{{ equipe.logo.url }}" alt="Logo de {{ equipe.nom }}" 
+                                 class="img-fluid rounded-4 shadow-sm" style="max-height: 150px;">
+                        {% else %}
+                            <div class="bg-light rounded-4 p-4">
+                                <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">Aucun logo</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-4 description-box p-3 rounded-4 bg-light">
+                        <h6 class="fw-bold text-dark mb-2">Description</h6>
+                        <p class="text-muted mb-0">{{ equipe.description|default:"Aucune description disponible" }}</p>
+                    </div>
+                    
+                    <!-- Détails -->
+                    <div class="info-list">
+                        <div class="d-flex align-items-center mb-3 p-2 rounded-3 info-item">
+                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-user-tie text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Responsable</small>
+                                <span class="fw-medium">{{ equipe.responsable.user.get_full_name|default:equipe.responsable.user.username }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3 p-2 rounded-3 info-item">
+                            <div class="flex-shrink-0 bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-calendar-plus text-success"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Date de création</small>
+                                <span class="fw-medium">{{ equipe.date_creation|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center p-2 rounded-3 info-item">
+                            <div class="flex-shrink-0 bg-info bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-users text-info"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Membres</small>
+                                <span class="fw-medium">{{ membres.count }} personne{{ membres.count|pluralize }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liste des membres -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 hover-card">
+                <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-users me-2 text-primary"></i>Membres de l'équipe
+                    </h5>
+                    {% if est_responsable %}
+                        <button class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#ajoutRapideModal">
+                            <i class="fas fa-plus me-1"></i>Ajouter
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4">
+                    {% if membres %}
+                        <div class="row g-3">
+                            {% for membre in membres %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center p-3 bg-light rounded-4 member-card">
+                                    <div class="flex-shrink-0 me-3">
+                                        <div class="bg-gradient-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 50px; height: 50px;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-medium">
+                                            {% if membre.utilisateur.get_full_name %}
+                                                {{ membre.utilisateur.get_full_name }}
+                                            {% else %}
+                                                {{ membre.utilisateur.username }}
+                                            {% endif %}
+                                            {% if membre.utilisateur == equipe.responsable.user %}
+                                                <span class="badge bg-primary ms-2 rounded-pill">Responsable</span>
+                                            {% endif %}
+                                        </h6>
+                                        <small class="text-muted d-block">
+                                            {% if membre.utilisateur == equipe.responsable.user %}
+                                                Responsable d'équipe
+                                            {% else %}
+                                                {{ membre.position|default:"Membre" }}
+                                            {% endif %}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>Depuis le {{ membre.date_ajout|date:"d/m/Y" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucun membre dans cette équipe pour le moment.</p>
+                            {% if est_responsable %}
+                                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#ajoutRapideModal">
+                                    <i class="fas fa-plus me-2"></i>Ajouter le premier membre
+                                </button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'ajout rapide de membre -->
+<div class="modal fade" id="ajoutRapideModal" tabindex="-1" aria-labelledby="ajoutRapideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-gradient-primary text-white border-0">
+                <h5 class="modal-title" id="ajoutRapideModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Ajout rapide d'un membre
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{% url 'equipes:ajout_rapide_membre' equipe.id %}" method="post" class="needs-validation" id="ajoutRapideForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-medium">Email du participant</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-envelope text-primary"></i>
+                            </span>
+                            <input type="email" class="form-control bg-light border-start-0" id="email" name="email" 
+                                   placeholder="exemple@email.com" required>
+                            <div class="invalid-feedback">
+                                Veuillez entrer une adresse email valide
+                            </div>
+                        </div>
+                        <div class="mt-2 email-status" id="emailStatus"></div>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Un email d'invitation sera envoyé à cette adresse
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-medium d-block mb-2">Position dans l'équipe</label>
+                        <div class="position-grid">
+                            <div class="position-item">
+                                <input type="radio" class="btn-check" name="position" id="pos-gardien" value="Gardien">
+                                <label class="btn btn-outline-warning position-btn" for="pos-gardien">
+                                    <i class="fas fa-hands d-block mb-1"></i>Gardien
+                                </label>
+                            </div>
+                            
+                            <div class="position-item">
+                                <input type="radio" class="btn-check" name="position" id="pos-defenseur" value="Défenseur">
+                                <label class="btn btn-outline-danger position-btn" for="pos-defenseur">
+                                    <i class="fas fa-shield-alt d-block mb-1"></i>Défenseur
+                                </label>
+                            </div>
+                            
+                            <div class="position-item">
+                                <input type="radio" class="btn-check" name="position" id="pos-milieu" value="Milieu">
+                                <label class="btn btn-outline-success position-btn" for="pos-milieu">
+                                    <i class="fas fa-exchange-alt d-block mb-1"></i>Milieu
+                                </label>
+                            </div>
+                            
+                            <div class="position-item">
+                                <input type="radio" class="btn-check" name="position" id="pos-attaquant" value="Attaquant" checked>
+                                <label class="btn btn-outline-primary position-btn" for="pos-attaquant">
+                                    <i class="fas fa-futbol d-block mb-1"></i>Attaquant
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-2 border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">
+                                Annuler
+                            </button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4" id="submitBtn">
+                                <span class="d-flex align-items-center">
+                                    <i class="fas fa-paper-plane me-2"></i>
+                                    <span>Envoyer l'invitation</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Vérification email en temps réel
+    const emailInput = document.getElementById('email');
+    const emailStatus = document.getElementById('emailStatus');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (emailInput && emailStatus) {
+        emailInput.addEventListener('input', function() {
+            const email = this.value.trim();
+            if (email && email.includes('@')) {
+                emailStatus.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div> Vérification...';
+                
+                // Attendre que l'utilisateur ait fini de taper
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => {
+                    emailStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i> Email valide</span>';
+                }, 800);
+            } else {
+                emailStatus.innerHTML = '';
+            }
+        });
+    }
+    
+    // Gestion du formulaire
+    const form = document.getElementById('ajoutRapideForm');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Envoi en cours...';
+            }
+            this.classList.add('was-validated');
+        });
+    }
+});
+</script>
+{% endblock %}

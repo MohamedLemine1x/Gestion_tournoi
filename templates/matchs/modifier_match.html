@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Modifier un match | TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .match-form-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .match-form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-text {
+        color: #6c757d;
+    }
+    
+    .team-selection {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+    
+    .team-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .team-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        margin-right: 15px;
+        object-fit: cover;
+        border: 2px solid #dee2e6;
+    }
+    
+    .team-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .team-role {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <!-- Titre et explication -->
+            <div class="mb-4 text-center">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-edit text-warning me-2"></i>
+                    Modifier le match
+                </h1>
+                <p class="lead text-muted">
+                    {{ match.equipe_a.nom }} vs {{ match.equipe_b.nom }}
+                </p>
+            </div>
+            
+            <!-- Navigation -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'matchs:liste' %}">Matchs</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'matchs:detail' match.id %}">Détails</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                </ol>
+            </nav>
+            
+            <!-- Formulaire de modification de match -->
+            <div class="card match-form-card">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Affichage des messages d'erreurs et de succès -->
+                        {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}" role="alert">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Équipe A (Domicile) -->
+                        <div class="mb-4">
+                            <label for="equipe_a" class="form-label">Équipe domicile</label>
+                            <select class="form-select" id="equipe_a" name="equipe_a" required>
+                                <option value="">Sélectionnez une équipe</option>
+                                {% for equipe in equipes %}
+                                <option value="{{ equipe.id }}" {% if equipe.id == match.equipe_a.id %}selected{% endif %}>{{ equipe.nom }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Équipe qui joue à domicile</div>
+                        </div>
+                        
+                        <!-- Équipe B (Extérieur) -->
+                        <div class="mb-4">
+                            <label for="equipe_b" class="form-label">Équipe extérieur</label>
+                            <select class="form-select" id="equipe_b" name="equipe_b" required>
+                                <option value="">Sélectionnez une équipe</option>
+                                {% for equipe in equipes %}
+                                <option value="{{ equipe.id }}" {% if equipe.id == match.equipe_b.id %}selected{% endif %}>{{ equipe.nom }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Équipe qui joue à l'extérieur</div>
+                        </div>
+                        
+                        <!-- Date et heure du match -->
+                        <div class="mb-4">
+                            <label for="date" class="form-label">Date et heure du match</label>
+                            <input type="datetime-local" class="form-control" id="date" name="date" value="{{ date_match }}" required>
+                            <div class="form-text">Sélectionnez la date et l'heure prévues pour le match</div>
+                        </div>
+                        
+                        <!-- Lieu du match -->
+                        <div class="mb-4">
+                            <label for="lieu" class="form-label">Lieu du match</label>
+                            <input type="text" class="form-control" id="lieu" name="lieu" value="{{ match.lieu|default:'' }}" placeholder="Nom du stade, adresse...">
+                            <div class="form-text">Précisez le lieu où se déroulera le match</div>
+                        </div>
+                        
+                        <!-- Boutons d'action -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'matchs:detail' match.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-1"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Alerte pour actions supplémentaires -->
+            <div class="alert alert-info mt-4" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                Si vous souhaitez enregistrer un résultat ou supprimer ce match, vous pouvez le faire depuis la <a href="{% url 'matchs:detail' match.id %}" class="alert-link">page de détail du match</a>.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

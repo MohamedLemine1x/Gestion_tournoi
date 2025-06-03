@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Classement - {{ tournoi.nom }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- En-tête de la page -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-medal me-3" style="font-size: 2rem;"></i>
+                <h3 class="mb-0">Classement - {{ tournoi.nom }}</h3>
+            </div>
+            <a href="{% url 'tournois:detail' tournoi.id %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Retour au tournoi
+            </a>
+        </div>
+        <div class="card-body">
+            <p class="lead">
+                {% if tournoi.date_fin %}
+                    Classement du tournoi du {{ tournoi.date_debut|date:"d/m/Y" }} au {{ tournoi.date_fin|date:"d/m/Y" }}
+                {% else %}
+                    Classement du tournoi du {{ tournoi.date_debut|date:"d/m/Y" }}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Tableau de classement -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if classement %}
+                <div class="table-responsive">
+                    <table class="table table-hover standings-table mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>Équipe</th>
+                                <th class="text-center">MJ</th>
+                                <th class="text-center">V</th>
+                                <th class="text-center">N</th>
+                                <th class="text-center">D</th>
+                                <th class="text-center">BP</th>
+                                <th class="text-center">BC</th>
+                                <th class="text-center">DB</th>
+                                <th class="text-center">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for equipe in classement %}
+                                <tr class="{% if forloop.counter <= 3 %}table-row-top{% endif %}">
+                                    <td class="text-center position-column">
+                                        <span class="position-badge {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+                                            {{ forloop.counter }}
+                                        </span>
+                                    </td>
+                                    <td class="team-column">
+                                        <div class="d-flex align-items-center">
+                                            <div class="team-icon me-3">
+                                                {% if equipe.equipe.logo %}
+                                                    <img src="{{ equipe.equipe.logo.url }}" alt="Logo {{ equipe.equipe.nom }}" class="team-logo">
+                                                {% else %}
+                                                    <i class="fas fa-shield-alt"></i>
+                                                {% endif %}
+                                            </div>
+                                            <span class="team-name">{{ equipe.equipe.nom }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ equipe.matchs_joues }}</td>
+                                    <td class="text-center text-success fw-bold">{{ equipe.victoires }}</td>
+                                    <td class="text-center text-secondary">{{ equipe.nuls }}</td>
+                                    <td class="text-center text-danger">{{ equipe.defaites }}</td>
+                                    <td class="text-center">{{ equipe.buts_pour }}</td>
+                                    <td class="text-center">{{ equipe.buts_contre }}</td>
+                                    <td class="text-center {% if equipe.difference_buts > 0 %}text-success{% elif equipe.difference_buts < 0 %}text-danger{% endif %}">
+                                        {{ equipe.difference_buts }}
+                                    </td>
+                                    <td class="text-center points-column fw-bold">{{ equipe.points }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state text-center py-5">
+                    <div class="empty-icon mb-3">
+                        <i class="fas fa-trophy" style="font-size: 4rem; opacity: 0.2;"></i>
+                    </div>
+                    <h4 class="text-muted">Aucun match joué pour le moment</h4>
+                    <p class="text-muted mb-4">Le classement sera disponible dès que des matchs auront été joués.</p>
+                    <a href="{% url 'tournois:planifier_matchs' tournoi.id %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-check me-2"></i>Planifier des matchs
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-info-circle me-2 text-primary"></i>
+                Légende
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="legend-list">
+                        <li><span>MJ</span> : Matchs joués</li>
+                        <li><span>V</span> : Victoires</li>
+                        <li><span>N</span> : Matchs nuls</li>
+                        <li><span>D</span> : Défaites</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="legend-list">
+                        <li><span>BP</span> : Buts pour</li>
+                        <li><span>BC</span> : Buts contre</li>
+                        <li><span>DB</span> : Différence de buts</li>
+                        <li><span>Points</span> : 3 points par victoire, 1 point par match nul</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles pour le tableau de classement */
+    .standings-table {
+        font-size: 0.95rem;
+    }
+    
+    .standings-table thead th {
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        border-bottom: none;
+        padding: 15px;
+    }
+    
+    .standings-table tbody td {
+        padding: 15px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+    
+    /* Styles pour les positions */
+    .position-column {
+        width: 60px;
+    }
+    
+    .position-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        font-weight: bold;
+    }
+    
+    .position-badge.gold {
+        background-color: #FFD700;
+        color: #333;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    
+    .position-badge.silver {
+        background-color: #C0C0C0;
+        color: #333;
+        box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+    }
+    
+    .position-badge.bronze {
+        background-color: #CD7F32;
+        color: white;
+        box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+    }
+    
+    /* Styles pour les équipes */
+    .team-column {
+        min-width: 200px;
+    }
+    
+    .team-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+        overflow: hidden;
+    }
+    
+    .team-logo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    
+    .team-name {
+        font-weight: 600;
+    }
+    
+    /* Style pour les points */
+    .points-column {
+        font-size: 1.1rem;
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    /* Styles pour les lignes de top 3 */
+    .table-row-top {
+        background-color: rgba(0, 123, 255, 0.03);
+    }
+    
+    /* Styles pour la légende */
+    .legend-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .legend-list li {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .legend-list li span {
+        font-weight: bold;
+        color: #495057;
+        margin-right: 5px;
+    }
+    
+    /* Styles pour l'état vide */
+    .empty-state {
+        padding: 40px 20px;
+    }
+    
+    .empty-icon {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %} 

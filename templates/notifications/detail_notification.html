@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} | TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notification-detail-card {
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .notification-detail-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    .notification-header {
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .notification-type-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+    .notification-info {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    .notification-body {
+        padding: 20px;
+        background-color: #fff;
+    }
+    .notification-message {
+        font-size: 1.125rem;
+        line-height: 1.6;
+        color: #343a40;
+        white-space: pre-line;
+    }
+    .notification-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card notification-detail-card mb-4 border-0 shadow-sm">
+                <div class="notification-header">
+                    {% if notification.type_notification == 'info' %}
+                        <div class="notification-type-badge bg-primary text-white">Information</div>
+                    {% elif notification.type_notification == 'match_amical' %}
+                        <div class="notification-type-badge bg-success text-white">Match amical</div>
+                    {% elif notification.type_notification == 'tournoi' %}
+                        <div class="notification-type-badge bg-danger text-white">Tournoi</div>
+                    {% elif notification.type_notification == 'equipe' %}
+                        <div class="notification-type-badge bg-warning text-dark">Équipe</div>
+                    {% elif notification.type_notification == 'resultat' %}
+                        <div class="notification-type-badge bg-info text-white">Résultat</div>
+                    {% endif %}
+                    
+                    <h2 class="h3 mb-3">{{ notification.titre }}</h2>
+                    <div class="notification-info d-flex align-items-center">
+                        <i class="far fa-clock me-2"></i> 
+                        <span>Envoyé {{ notification.date_creation|date:"j F Y à H:i" }}</span>
+                        <span class="mx-2">•</span>
+                        <i class="far {% if notification.lu %}fa-check-circle{% else %}fa-eye{% endif %} me-2"></i>
+                        <span>{{ notification.lu|yesno:"Lu,Non lu" }}</span>
+                    </div>
+                </div>
+                
+                <div class="notification-body">
+                    <div class="notification-message mb-4">{{ notification.message }}</div>
+                    
+                    <div class="notification-actions">
+                        {% if notification.lien %}
+                            <a href="{{ notification.lien }}" class="btn btn-primary">
+                                <i class="fas fa-external-link-alt me-2"></i>
+                                Voir le contenu associé
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'notifications:liste' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>
+                            Retour à la liste
+                        </a>
+                        
+                        <form action="{% url 'notifications:supprimer' notification.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette notification ?');">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            {% if notification.type_notification == 'match_amical' %}
+                <div class="card border-0 shadow-sm p-4">
+                    <h3 class="h5 mb-3"><i class="fas fa-futbol me-2"></i> Actions rapides</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'matchs:liste' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-list me-1"></i> Voir tous les matchs
+                        </a>
+                        <a href="{% url 'participants:tableau_bord' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-tachometer-alt me-1"></i> Mon tableau de bord
+                        </a>
+                    </div>
+                </div>
+            {% elif notification.type_notification == 'tournoi' %}
+                <div class="card border-0 shadow-sm p-4">
+                    <h3 class="h5 mb-3"><i class="fas fa-trophy me-2"></i> Actions rapides</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'tournois:liste' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-list me-1"></i> Voir tous les tournois
+                        </a>
+                        <a href="{% url 'participants:voir_tournois_disponibles' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-search me-1"></i> Tournois disponibles
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

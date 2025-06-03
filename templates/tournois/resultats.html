@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+
+{% block title %}Résultats - {{ tournoi.nom }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- En-tête de la page -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-trophy me-3" style="font-size: 2rem;"></i>
+                <h3 class="mb-0">Résultats - {{ tournoi.nom }}</h3>
+            </div>
+            <a href="{% url 'tournois:detail' tournoi.id %}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Retour au tournoi
+            </a>
+        </div>
+        <div class="card-body">
+            <p class="lead">
+                {% if tournoi.date_fin %}
+                    Résultats du tournoi du {{ tournoi.date_debut|date:"d/m/Y" }} au {{ tournoi.date_fin|date:"d/m/Y" }}
+                {% else %}
+                    Résultats du tournoi du {{ tournoi.date_debut|date:"d/m/Y" }}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Navigation par onglets -->
+    <ul class="nav nav-tabs nav-fill mb-4" id="resultsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="true">
+                <i class="fas fa-flag-checkered me-2"></i>Matchs terminés ({{ matchs_termines.count }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="false">
+                <i class="fas fa-calendar-alt me-2"></i>Matchs à venir ({{ matchs_a_venir.count }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenu des onglets -->
+    <div class="tab-content" id="resultsTabsContent">
+        <!-- Matchs terminés -->
+        <div class="tab-pane fade show active" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+            {% if matchs_termines %}
+                <div class="matches-container">
+                    {% for match in matchs_termines %}
+                        <div class="card match-card shadow-sm mb-3">
+                            <div class="card-body p-0">
+                                <div class="match-header">
+                                    <div class="match-date">
+                                        <i class="far fa-calendar-alt me-2"></i>{{ match.date_match|date:"d/m/Y" }}
+                                    </div>
+                                    <div class="match-details">
+                                        <span class="badge bg-success">Terminé</span>
+                                    </div>
+                                </div>
+                                <div class="match-content">
+                                    <div class="team team-home d-flex align-items-center justify-content-end">
+                                        <div class="team-info text-end">
+                                            <div class="team-name">{{ match.equipe_domicile.nom }}</div>
+                                            <div class="team-status">Domicile</div>
+                                        </div>
+                                        <div class="team-logo ms-3">
+                                            {% if match.equipe_domicile.logo %}
+                                            <img src="{{ match.equipe_domicile.logo.url }}" alt="{{ match.equipe_domicile.nom }}" class="team-img">
+                                            {% else %}
+                                            <span class="team-placeholder">{{ match.equipe_domicile.nom|slice:":1" }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="score-container">
+                                        <div class="score">
+                                            <span class="score-home">{{ match.score_domicile }}</span>
+                                            <span class="score-separator">-</span>
+                                            <span class="score-away">{{ match.score_exterieur }}</span>
+                                        </div>
+                                        <div class="match-time">
+                                            <i class="far fa-clock me-1"></i>{{ match.date_match|date:"H:i" }}
+                                        </div>
+                                    </div>
+                                    <div class="team team-away d-flex align-items-center">
+                                        <div class="team-logo me-3">
+                                            {% if match.equipe_exterieur.logo %}
+                                            <img src="{{ match.equipe_exterieur.logo.url }}" alt="{{ match.equipe_exterieur.nom }}" class="team-img">
+                                            {% else %}
+                                            <span class="team-placeholder">{{ match.equipe_exterieur.nom|slice:":1" }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="team-info text-start">
+                                            <div class="team-name">{{ match.equipe_exterieur.nom }}</div>
+                                            <div class="team-status">Extérieur</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="match-footer">
+                                    <div class="match-location">
+                                        <i class="fas fa-map-marker-alt me-2"></i>{{ match.lieu_match|default:"Non spécifié" }}
+                                    </div>
+                                    <a href="{% url 'tournois:detail_match' match.id %}" class="btn btn-sm btn-outline-primary view-details-btn">
+                                        <i class="fas fa-eye me-1"></i>Détails
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="empty-state text-center py-5">
+                            <div class="empty-icon mb-3">
+                                <i class="fas fa-flag-checkered" style="font-size: 4rem; opacity: 0.2;"></i>
+                            </div>
+                            <h4 class="text-muted">Aucun match terminé</h4>
+                            <p class="text-muted mb-4">Les résultats apparaîtront ici une fois que des matchs auront été joués.</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Matchs à venir -->
+        <div class="tab-pane fade" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+            {% if matchs_a_venir %}
+                <div class="matches-container">
+                    {% for match in matchs_a_venir %}
+                        <div class="card match-card shadow-sm mb-3">
+                            <div class="card-body p-0">
+                                <div class="match-header">
+                                    <div class="match-date">
+                                        <i class="far fa-calendar-alt me-2"></i>{{ match.date_match|date:"d/m/Y" }}
+                                    </div>
+                                    <div class="match-details">
+                                        <span class="badge bg-info">À venir</span>
+                                    </div>
+                                </div>
+                                <div class="match-content">
+                                    <div class="team team-home d-flex align-items-center justify-content-end">
+                                        <div class="team-info text-end">
+                                            <div class="team-name">{{ match.equipe_domicile.nom }}</div>
+                                            <div class="team-status">Domicile</div>
+                                        </div>
+                                        <div class="team-logo ms-3">
+                                            {% if match.equipe_domicile.logo %}
+                                            <img src="{{ match.equipe_domicile.logo.url }}" alt="{{ match.equipe_domicile.nom }}" class="team-img">
+                                            {% else %}
+                                            <span class="team-placeholder">{{ match.equipe_domicile.nom|slice:":1" }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="score-container upcoming">
+                                        <div class="score">
+                                            <span class="score-vs">VS</span>
+                                        </div>
+                                    </div>
+                                    <div class="team team-away d-flex align-items-center">
+                                        <div class="team-logo me-3">
+                                            {% if match.equipe_exterieur.logo %}
+                                            <img src="{{ match.equipe_exterieur.logo.url }}" alt="{{ match.equipe_exterieur.nom }}" class="team-img">
+                                            {% else %}
+                                            <span class="team-placeholder">{{ match.equipe_exterieur.nom|slice:":1" }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="team-info text-start">
+                                            <div class="team-name">{{ match.equipe_exterieur.nom }}</div>
+                                            <div class="team-status">Extérieur</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="match-footer">
+                                    <div class="match-location">
+                                        <i class="fas fa-map-marker-alt me-2"></i>{{ match.lieu_match|default:"Non spécifié" }}
+                                    </div>
+                                    <a href="{% url 'tournois:detail_match' match.id %}" class="btn btn-sm btn-outline-primary view-details-btn">
+                                        <i class="fas fa-eye me-1"></i>Détails
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="empty-state text-center py-5">
+                            <div class="empty-icon mb-3">
+                                <i class="fas fa-calendar-alt" style="font-size: 4rem; opacity: 0.2;"></i>
+                            </div>
+                            <h4 class="text-muted">Aucun match planifié</h4>
+                            <p class="text-muted mb-4">Vous pouvez planifier des matchs pour ce tournoi.</p>
+                            <a href="{% url 'tournois:planifier_matchs' tournoi.id %}" class="btn btn-primary">
+                                <i class="fas fa-calendar-plus me-2"></i>Planifier des matchs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles de navigation */
+    .nav-tabs {
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 600;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        margin-bottom: -2px;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #007bff;
+        background-color: transparent;
+        border-bottom: 2px solid #007bff;
+        margin-bottom: -2px;
+    }
+    
+    /* Styles de match */
+    .match-card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .match-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .match-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .match-date {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .match-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 15px;
+    }
+    
+    .team {
+        flex: 1;
+    }
+    
+    .team-logo {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 123, 255, 0.1);
+        border-radius: 50%;
+        font-size: 1.5rem;
+        color: #007bff;
+    }
+    
+    .team-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .team-placeholder {
+        font-weight: bold;
+    }
+    
+    .team-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #343a40;
+    }
+    
+    .team-status {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+    }
+    
+    .score-container {
+        padding: 0 20px;
+        text-align: center;
+    }
+    
+    .score {
+        background-color: rgba(0, 123, 255, 0.1);
+        padding: 10px 20px;
+        border-radius: 30px;
+        display: inline-block;
+    }
+    
+    .score-home, .score-away {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #343a40;
+    }
+    
+    .score-separator {
+        font-size: 1.5rem;
+        font-weight: 300;
+        color: #6c757d;
+        margin: 0 5px;
+    }
+    
+    .score-vs {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #6c757d;
+    }
+    
+    .match-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .match-location {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .view-details-btn {
+        font-size: 0.85rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+    
+    /* Styles pour l'état vide */
+    .empty-state {
+        padding: 40px 20px;
+    }
+    
+    .empty-icon {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %} 

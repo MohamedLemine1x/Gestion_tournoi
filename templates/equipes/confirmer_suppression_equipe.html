@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirmer suppression équipe - {{ equipe.nom }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.delete-confirmation-card {
+    max-width: 600px;
+    margin: 2rem auto;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.15);
+    border: 1px solid var(--danger-color, #dc3545);
+}
+
+.delete-confirmation-card .card-header {
+    background: linear-gradient(135deg, var(--danger-color, #dc3545) 0%, #c82333 100%);
+    color: white;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.delete-confirmation-card .card-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.delete-confirmation-card .card-body {
+    padding: 2rem;
+    background-color: #fff;
+}
+
+.delete-confirmation-card .lead {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #343a40;
+}
+
+.delete-confirmation-card .alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #664d03;
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.delete-confirmation-card .alert-warning .alert-heading {
+    color: #664d03;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.delete-confirmation-card .alert-warning ul {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.delete-confirmation-card .alert-warning li {
+    margin-bottom: 0.5rem;
+}
+
+.delete-confirmation-card .btn-danger {
+    background-color: var(--danger-color, #dc3545);
+    border-color: var(--danger-color, #dc3545);
+    transition: all 0.3s ease;
+}
+
+.delete-confirmation-card .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+.delete-confirmation-card .btn-secondary {
+     transition: all 0.3s ease;
+}
+
+.delete-confirmation-card .btn-secondary:hover {
+    transform: translateY(-2px);
+     box-shadow: 0 4px 10px rgba(108, 117, 125, 0.15);
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card delete-confirmation-card">
+                <div class="card-header text-center">
+                    <i class="fas fa-skull-crossbones fa-3x mb-3"></i>
+                    <h3>Confirmer la suppression de l'équipe</h3>
+                     <p class="mb-0 opacity-75">Action irréversible</p>
+                </div>
+                <div class="card-body text-center">
+                    <p class="lead">
+                        Voulez-vous vraiment supprimer l'équipe <br><strong>"{{ equipe.nom }}"</strong> ?
+                    </p>
+                    
+                    <div class="alert alert-warning" role="alert">
+                        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Attention !</h5>
+                        <p>Cette action est **IRRÉVERSIBLE**. Toutes les données associées à cette équipe seront perdues :</p>
+                        <ul>
+                            <li>Informations de l'équipe (description, logo)</li>
+                            <li>Les <strong>{{ membres_count }}</strong> membre{{ membres_count|pluralize }} de l'équipe</li>
+                            <li>Historique de participation aux tournois</li>
+                        </ul>
+                        <p class="mb-0">Veuillez réfléchir attentivement avant de confirmer.</p>
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                            <button type="submit" class="btn btn-danger btn-lg flex-fill">
+                                <i class="fas fa-trash-alt me-2"></i>Supprimer définitivement
+                            </button>
+                            <a href="{% url 'equipes:gestion_equipe' %}" class="btn btn-secondary btn-lg flex-fill">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                             <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-outline-secondary btn-lg flex-fill">
+                                <i class="fas fa-chart-bar me-2"></i>Tableau de bord
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

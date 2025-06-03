@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier un membre{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-edit"></i> 
+                        Modifier {{ membre.utilisateur.get_full_name|default:membre.utilisateur.username }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nom du membre</label>
+                            <input type="text" class="form-control" 
+                                   value="{{ membre.utilisateur.get_full_name|default:membre.utilisateur.username }}" 
+                                   readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" 
+                                   value="{{ membre.utilisateur.email }}" 
+                                   readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Position</label>
+                            <div class="position-choices d-flex flex-wrap gap-2">
+                                {% for value, label in positions_choices %}
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" 
+                                           name="position" id="position-{{ value|slugify }}" 
+                                           value="{{ value }}" 
+                                           {% if membre.position == value %}checked{% endif %}>
+                                    <label class="form-check-label" for="position-{{ value|slugify }}">
+                                        {{ label }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'equipes:gestion_equipe' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

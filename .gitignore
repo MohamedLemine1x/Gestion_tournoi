@@ -1,0 +1,65 @@
+# Fichiers Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environnements virtuels
+.venv
+venv/
+ENV/
+
+# Base de données
+*.sqlite3
+db.sqlite3-journal
+
+# Logs
+*.log
+debug.log
+mail_debug.log
+
+# Dossiers de médias et fichiers statiques générés
+media/
+staticfiles/
+
+# Configuration locale
+.env
+local_settings.py
+*.bak
+
+# Fichiers IDE
+.idea/
+.vscode/
+.project
+.pydevproject
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Fichiers générés par Django
+*.pot
+*.mo
+*.pyc
+*.pyo
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.swp
+*~ 

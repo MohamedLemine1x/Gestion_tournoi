@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title|default:"Erreur" }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning fa-4x"></i>
+                    </div>
+                    <h2 class="mb-3">{{ title|default:"Erreur" }}</h2>
+                    <p class="lead mb-4">{{ message|default:"Une erreur inattendue s'est produite." }}</p>
+                    
+                    {% if details %}
+                    <div class="alert alert-secondary">
+                        <h5 class="mb-2">Détails techniques:</h5>
+                        <pre class="mb-0 text-start"><code>{{ details }}</code></pre>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-primary me-2">
+                            <i class="fas fa-home me-2"></i>Retour à l'accueil
+                        </a>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

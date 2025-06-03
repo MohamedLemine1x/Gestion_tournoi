@@ -1,0 +1,16 @@
+<!-- Empty state component template -->
+<div class="empty-state">
+  <i class="{{ icon }}"></i>
+  <h5>{{ title }}</h5>
+  <p>{{ message }}</p>
+  <div class="empty-state-actions">
+    <a href="{% url primary_button_url %}" class="btn btn-primary-custom focus-effect">
+      <i class="{{ primary_button_icon }} me-1"></i>{{ primary_button_text }}
+    </a>
+    {% if secondary_button_url %}
+    <a href="{% url secondary_button_url %}" class="btn btn-outline-primary-custom focus-effect">
+      <i class="{{ secondary_button_icon }} me-1"></i>{{ secondary_button_text }}
+    </a>
+    {% endif %}
+  </div>
+</div>

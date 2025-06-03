@@ -1,0 +1,538 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Modifier {{ tournoi.nom }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid max-width-container remove-top-space">
+    <div class="card shadow-xl">
+        <div class="card-header bg-gradient text-white py-5">
+            <div class="d-flex align-items-center">
+                <div class="header-icon-container me-4">
+                    <div class="header-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="header-pulse"></div>
+                </div>
+                <div>
+                    <h2 class="mb-0 header-title">Modifier le tournoi</h2>
+                    <p class="mb-0 header-subtitle opacity-75">{{ tournoi.nom }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-5">
+            <form method="post" class="modern-form">
+                {% csrf_token %}
+                
+                <!-- Section Informations générales -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-icon-container">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h4 class="section-title">Informations générales</h4>
+                        <div class="section-line"></div>
+                    </div>
+                    
+                    <div class="section-content">
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <div class="form-field">
+                                    <div class="field-icon">
+                                        <i class="fas fa-trophy text-warning"></i>
+                                    </div>
+                                    {{ form.nom|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-4 mt-3">
+                            <div class="col-md-12">
+                                <div class="form-field">
+                                    <div class="field-icon">
+                                        <i class="fas fa-align-left text-info"></i>
+                                    </div>
+                                    {{ form.description|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-4 mt-3">
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <div class="field-icon">
+                                        <i class="fas fa-calendar-plus text-success"></i>
+                                    </div>
+                                    {{ form.date_debut|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <div class="field-icon">
+                                        <i class="fas fa-calendar-minus text-danger"></i>
+                                    </div>
+                                    {{ form.date_fin|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-4 mt-3">
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <div class="field-icon">
+                                        <i class="fas fa-map-marker-alt text-purple"></i>
+                                    </div>
+                                    {{ form.lieu|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="actions-container">
+                    <div class="actions-inner">
+                        <a href="{% url 'tournois:detail' tournoi.pk %}" class="btn btn-outline-secondary btn-action">
+                            <div class="btn-content">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Retour</span>
+                            </div>
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-action">
+                            <div class="btn-content">
+                                <i class="fas fa-save"></i>
+                                <span>Enregistrer les modifications</span>
+                            </div>
+                            <div class="btn-ripple"></div>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CORRECTION ESPACE EN HAUT - À AJOUTER AU DÉBUT */
+    body {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    .container-fluid {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    .remove-top-space {
+        margin-top: -30px !important;
+        padding-top: 0 !important;
+    }
+    
+    /* Alternative si l'espace persiste */
+    .max-width-container {
+        position: relative;
+        top: -20px; /* Ajustez cette valeur si nécessaire */
+    }
+    
+    /* Variables CSS */
+    :root {
+        --primary-color: #4f46e5;
+        --primary-light: #6366f1;
+        --primary-dark: #3730a3;
+        --secondary-color: #06b6d4;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #06b6d4;
+        --purple-color: #8b5cf6;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --border-radius: 16px;
+        --border-radius-sm: 12px;
+        --border-radius-xs: 8px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-fast: all 0.15s ease;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Conteneur principal */
+    .max-width-container {
+        max-width: 900px;
+    }
+    
+    /* Carte principale */
+    .card {
+        border-radius: var(--border-radius);
+        border: none;
+        background: white;
+        overflow: hidden;
+    }
+    
+    .shadow-xl {
+        box-shadow: var(--shadow-xl);
+    }
+    
+    /* En-tête */
+    .bg-gradient {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--secondary-color) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .bg-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 20%, rgba(255, 255, 255, 0.1) 50%, transparent 80%);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    .header-icon-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .header-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        position: relative;
+        z-index: 2;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .header-pulse {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+    
+    .header-title {
+        font-weight: 700;
+        letter-spacing: -0.025em;
+    }
+    
+    .header-subtitle {
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+    
+    /* Formulaire moderne */
+    .modern-form {
+        position: relative;
+    }
+    
+    /* Section */
+    .section-card {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--gray-200);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .section-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .section-icon-container {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+    
+    .section-title {
+        font-weight: 600;
+        color: var(--gray-800);
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    
+    .section-line {
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, var(--gray-300), transparent);
+        margin-left: 1rem;
+    }
+    
+    /* Champs de formulaire */
+    .form-field {
+        position: relative;
+    }
+    
+    .field-icon {
+        position: absolute;
+        top: 40px;
+        left: 1rem;
+        font-size: 1.2rem;
+        z-index: 10;
+        transition: var(--transition);
+    }
+    
+    .form-field .form-control {
+        padding-left: 3rem;
+        border-radius: var(--border-radius-xs);
+        border: 2px solid var(--gray-300);
+        background: white;
+        transition: var(--transition);
+        font-size: 1rem;
+        height: auto;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        position: relative;
+    }
+    
+    .form-field .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.1);
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .form-field .form-control:focus + .field-icon {
+        color: var(--primary-color);
+        transform: scale(1.1);
+    }
+    
+    .form-field textarea.form-control {
+        min-height: 120px;
+        padding-top: 1rem;
+        line-height: 1.6;
+    }
+    
+    .form-field label {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    /* Couleurs spécifiques */
+    .text-purple {
+        color: var(--purple-color) !important;
+    }
+    
+    /* Actions */
+    .actions-container {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .actions-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .btn-action {
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        padding: 0.875rem 2rem;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        font-size: 1rem;
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .btn-content i {
+        font-size: 1.1rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border: none;
+        color: white;
+        box-shadow: var(--shadow);
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-outline-secondary {
+        background: transparent;
+        border: 2px solid var(--gray-300);
+        color: var(--gray-700);
+    }
+    
+    .btn-outline-secondary:hover {
+        background: var(--gray-100);
+        border-color: var(--gray-400);
+        color: var(--gray-800);
+        transform: translateY(-2px);
+    }
+    
+    /* Effet ripple */
+    .btn-ripple {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+    
+    .btn-primary:active .btn-ripple {
+        width: 200px;
+        height: 200px;
+    }
+    
+    /* Corrections pour Crispy Forms */
+    .form-group {
+        margin-bottom: 0;
+    }
+    
+    .asteriskField {
+        display: none;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+        
+        .header-pulse {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .section-card {
+            padding: 1.5rem;
+        }
+        
+        .form-field .form-control {
+            padding-left: 2.5rem;
+        }
+        
+        .field-icon {
+            left: 0.75rem;
+            top: 35px;
+        }
+        
+        .actions-inner {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn-action {
+            width: 100%;
+        }
+        
+        /* Correction mobile pour l'espace en haut */
+        .remove-top-space {
+            margin-top: -20px !important;
+        }
+    }
+    
+    /* Animations personnalisées */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .section-card {
+        animation: slideInUp 0.5s ease-out;
+    }
+    
+    .form-field {
+        animation: slideInUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .form-field:nth-child(1) { animation-delay: 0.1s; }
+    .form-field:nth-child(2) { animation-delay: 0.2s; }
+    .form-field:nth-child(3) { animation-delay: 0.3s; }
+    .form-field:nth-child(4) { animation-delay: 0.4s; }
+</style>
+{% endblock %}

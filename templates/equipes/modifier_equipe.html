@@ -1,0 +1,616 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Modifier l'équipe - {{ equipe.nom }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Variables CSS */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-500: #6c757d;
+    --gray-700: #495057;
+    --gray-900: #212529;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --transition: all 0.2s ease;
+}
+
+/* Reset et base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: white;
+    color: var(--gray-900);
+    line-height: 1.5;
+}
+
+/* Layout principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header amélioré */
+.header {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 20px 0;
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+/* Navigation améliorée */
+.nav-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 30px;
+    overflow-x: auto;
+}
+
+.nav-tab {
+    padding: 15px 20px;
+    text-decoration: none;
+    color: var(--gray-500);
+    border-bottom: 2px solid transparent;
+    transition: var(--transition);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-tab:hover {
+    color: var(--primary-color);
+    background: rgba(0, 123, 255, 0.05);
+}
+
+.nav-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background: rgba(0, 123, 255, 0.05);
+}
+
+/* Card principale */
+.main-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 25px;
+    transition: var(--transition);
+}
+
+.main-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+/* Formulaires améliorés */
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 15px;
+}
+
+.form-label i {
+    color: var(--primary-color);
+    width: 16px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 15px;
+    transition: var(--transition);
+    background: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-control:hover:not(:focus) {
+    border-color: var(--gray-500);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger-color);
+    background: rgba(220, 53, 69, 0.02);
+}
+
+/* Logo actuel amélioré */
+.current-logo {
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.current-logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+}
+
+.current-logo img {
+    max-height: 140px;
+    max-width: 100%;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+}
+
+.current-logo img:hover {
+    transform: scale(1.05);
+}
+
+.current-logo-label {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: var(--gray-100);
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Input file amélioré */
+.file-input-wrapper {
+    position: relative;
+    margin-top: 15px;
+}
+
+.file-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.file-input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px 20px;
+    border: 3px dashed var(--gray-300);
+    border-radius: var(--border-radius);
+    background: var(--gray-100);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    min-height: 120px;
+}
+
+.file-input-label:hover {
+    border-color: var(--primary-color);
+    background: rgba(0, 123, 255, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.15);
+}
+
+.file-input-icon {
+    font-size: 32px;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+    display: block;
+}
+
+.file-upload-text {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 5px;
+}
+
+.file-upload-hint {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+/* Messages d'alerte améliorés */
+.alert {
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: currentColor;
+}
+
+.alert-success {
+    background: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+/* Boutons améliorés */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-outline {
+    background: white;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.btn-outline:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Actions du formulaire */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* Responsive amélioré */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header h1 {
+        font-size: 24px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .nav-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .nav-tab {
+        padding: 12px 16px;
+        font-size: 13px;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Animations */
+.main-card {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Aperçu équipe modernisé -->
+    <div class="team-preview-card" style="display: flex; align-items: center; gap: 24px; background: linear-gradient(90deg, #e3f0ff 60%, #fff 100%); border-radius: 18px; box-shadow: 0 4px 24px rgba(0,123,255,0.07); padding: 32px 24px; margin-bottom: 32px;">
+        <div style="flex-shrink:0;">
+            {% if equipe.logo %}
+                <img src="{{ equipe.logo.url }}" alt="Logo équipe" style="width: 100px; height: 100px; border-radius: 16px; border: 3px solid #007bff; background: #fff; object-fit: cover; box-shadow: 0 2px 8px rgba(0,123,255,0.08);">
+            {% else %}
+                <img src="{% static 'img/default-team.png' %}" alt="Logo équipe" style="width: 100px; height: 100px; border-radius: 16px; border: 3px solid #007bff; background: #fff; object-fit: cover; box-shadow: 0 2px 8px rgba(0,123,255,0.08);">
+            {% endif %}
+        </div>
+        <div style="flex:1;">
+            <h2 style="margin:0; font-size:2rem; color:#007bff; font-weight:700;">{{ equipe.nom }}</h2>
+            <div style="color:#555; font-size:1rem; margin-top:8px;">
+                <i class="fas fa-calendar-alt me-1"></i> Créée le {{ equipe.date_creation|date:"d/m/Y" }}
+                &nbsp;|&nbsp;
+                <i class="fas fa-users me-1"></i> {{ equipe.membres.count }} membre{{ equipe.membres.count|pluralize }}
+            </div>
+            {% if equipe.description %}
+            <div style="margin-top:10px; color:#444; font-size:1.05rem;">{{ equipe.description|truncatewords:25 }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Messages d'alerte modernisés -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" style="font-size:1rem; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+            {% if message.tags == 'success' %}
+                <i class="fas fa-check-circle"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                <i class="fas fa-exclamation-circle"></i>
+            {% else %}
+                <i class="fas fa-info-circle"></i>
+            {% endif %}
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulaire modernisé -->
+    <div class="main-card" style="max-width:600px; margin:auto; border-radius:18px; box-shadow:0 6px 32px rgba(0,123,255,0.09);">
+        <div class="card-header" style="background:#f4faff; border-radius:18px 18px 0 0; border-bottom:1px solid #e3f0ff;">
+            <h3 style="font-size:1.3rem; color:#007bff; font-weight:600; margin:0;">
+                <i class="fas fa-edit"></i> Modifier l'équipe
+            </h3>
+        </div>
+        <div class="card-body" style="padding:32px;">
+            <form method="post" enctype="multipart/form-data" id="equipeForm">
+                {% csrf_token %}
+                <!-- Nom de l'équipe -->
+                <div class="form-group">
+                    <label for="{{ form.nom.id_for_label }}" class="form-label">
+                        <i class="fas fa-users"></i> {{ form.nom.label }}
+                    </label>
+                    <input type="text" class="form-control {% if form.nom.errors %}is-invalid{% endif %}" id="{{ form.nom.id_for_label }}" name="{{ form.nom.name }}" value="{{ form.nom.value|default:'' }}" placeholder="Ex: Les Champions, Team Alpha..." required style="font-size:1.1rem;">
+                    {% if form.nom.errors %}
+                        <div class="alert alert-danger" style="margin-top: 10px;">{{ form.nom.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        <i class="fas fa-align-left"></i> {{ form.description.label }}
+                    </label>
+                    <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" id="{{ form.description.id_for_label }}" name="{{ form.description.name }}" rows="4" placeholder="Décrivez votre équipe : ses objectifs, son histoire, ses valeurs..." style="font-size:1.1rem;">{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                        <div class="alert alert-danger" style="margin-top: 10px;">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <!-- Logo -->
+                <div class="form-group">
+                    <label for="{{ form.logo.id_for_label }}" class="form-label">
+                        <i class="fas fa-image"></i> {{ form.logo.label }}
+                    </label>
+                    <div class="file-input-wrapper" style="margin-top:10px;">
+                        <input type="file" class="file-input" id="{{ form.logo.id_for_label }}" name="{{ form.logo.name }}" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp">
+                        <label for="{{ form.logo.id_for_label }}" class="file-input-label" style="border:2px dashed #007bff; background:#f4faff; border-radius:12px; padding:32px 0; display:flex; flex-direction:column; align-items:center; cursor:pointer;">
+                            <i class="fas fa-cloud-upload-alt file-input-icon" style="font-size:2rem; color:#007bff;"></i>
+                            <span class="file-upload-text" style="font-weight:600; color:#007bff;">Glissez-déposez ou cliquez pour choisir un logo</span>
+                            <span class="file-upload-hint" style="font-size:0.95rem; color:#888;">PNG, JPG, GIF ou WebP (max 5MB)</span>
+                            <img id="logoPreview" src="" alt="Aperçu logo" style="display:none; margin-top:12px; max-width:120px; border-radius:10px; box-shadow:0 2px 8px rgba(0,123,255,0.08);">
+                        </label>
+                    </div>
+                    {% if form.logo.errors %}
+                        <div class="alert alert-danger" style="margin-top: 10px;">{{ form.logo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <!-- Actions du formulaire -->
+                <div class="form-actions" style="display:flex; gap:18px; margin-top:32px; justify-content: space-between;">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary" style="font-size:1.1rem; border-radius:10px; padding:14px 32px;">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <a href="{% url 'equipes:gestion_equipe' %}" class="btn btn-outline" style="font-size:1.1rem; border-radius:10px; padding:14px 32px;">
+                            <i class="fas fa-times"></i> Annuler
+                        </a>
+                    </div>
+                    {% if equipe %}
+                    <a href="{% url 'equipes:supprimer_equipe' equipe.id %}" class="btn btn-danger" style="font-size:1.1rem; border-radius:10px; padding:14px 32px;" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette équipe ? Cette action est irréversible.');">
+                        <i class="fas fa-trash-alt"></i> Supprimer l'équipe
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('.file-input');
+    const logoPreview = document.getElementById('logoPreview');
+    const fileLabel = document.querySelector('.file-input-label');
+    // Aperçu du logo sélectionné
+    if (fileInput && logoPreview) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    logoPreview.src = evt.target.result;
+                    logoPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                logoPreview.style.display = 'none';
+            }
+        });
+    }
+    // Drag & drop visuel
+    if (fileLabel) {
+        fileLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#007bff';
+            this.style.background = '#e3f0ff';
+        });
+        fileLabel.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#007bff';
+            this.style.background = '#f4faff';
+        });
+        fileLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#007bff';
+            this.style.background = '#f4faff';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+    // Auto-resize du textarea
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+        });
+    }
+});
+</script>
+{% endblock %}

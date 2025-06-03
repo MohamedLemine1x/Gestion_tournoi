@@ -1,0 +1,301 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+  <div class="container">
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <i class="fas fa-futbol text-primary me-2"></i>
+      <span class="fw-bold text-primary">TournoiPRO</span>
+    </a>
+    
+    <!-- Mobile toggle button -->
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <!-- Collapsible content with user section -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+          <a class="nav-link px-3" href="{% url 'tournois:liste' %}">
+            <i class="fas fa-trophy me-1"></i> Tournois
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3" href="{% url 'equipes:liste_equipes' %}">
+            <i class="fas fa-users me-1"></i> Équipes
+          </a>
+        </li>
+        <li class="nav-item d-none d-lg-block">
+          <span class="nav-link disabled">|</span>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3" href="#" data-bs-toggle="modal" data-bs-target="#searchModal">
+            <i class="fas fa-search me-1"></i> Rechercher
+          </a>
+        </li>
+      </ul>
+      
+      <div class="navbar-nav ms-auto d-flex align-items-center">
+        {% if user.is_authenticated %}
+          <!-- Notifications dropdown -->
+          <div class="nav-item dropdown me-3">
+            <a class="nav-link position-relative" href="#" role="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-bell fa-lg" id="notification-bell"></i>
+              <span class="notification-badge" id="notification-badge">0</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+              <div class="notification-header">
+                <span>Notifications</span>
+                <form action="{% url 'notifications:marquer_toutes_lues' %}" method="post" id="mark-all-read-form-navbar" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-link p-0 text-white" style="background:none; border:none;">
+                    <i class="fas fa-check-double" title="Tout marquer comme lu"></i>
+                  </button>
+                </form>
+              </div>
+              
+              <!-- Notifications list -->
+              <div class="notification-list" id="navbar-notification-list" style="max-height: 500px; overflow-y: auto;">
+                <!-- Notification items will be populated dynamically by JavaScript -->
+                <div class="notification-item text-center py-3" id="empty-notification-message">
+                  <div class="notification-message text-muted">
+                    <i class="fas fa-bell-slash me-2"></i>
+                    Pas de nouvelles notifications
+                  </div>
+                </div>
+              </div>
+              
+              <div class="notification-footer">
+                <div class="d-flex justify-content-between align-items-center p-2">
+                  <a href="{% url 'notifications:liste' %}" class="btn btn-primary btn-sm w-100">
+                    <i class="fas fa-list me-1"></i> Voir toutes les notifications
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- User dropdown -->
+          <div class="nav-item dropdown">
+            <a class="btn btn-outline-primary dropdown-toggle d-flex align-items-center" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user me-2"></i> <span class="d-none d-sm-inline">{{ user.username }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="userDropdown" style="border-radius: 12px; min-width: 230px;">
+              <li>
+                <div class="px-3 py-2 d-flex align-items-center">
+                  <div class="flex-shrink-0">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                      <i class="fas fa-user"></i>
+                    </div>
+                  </div>
+                  <div class="ms-3">
+                    <h6 class="mb-0 fw-bold">{{ user.username }}</h6>
+                    <small class="text-muted">{{ user.email }}</small>
+                  </div>
+                </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item py-2" href="{% url 'accounts:profile' %}"><i class="fas fa-user-circle me-2 text-primary"></i> Mon profil</a></li>
+              {% if user.type == 'responsable' %}
+                <li><a class="dropdown-item py-2" href="{% url 'responsables:tableau_bord' %}"><i class="fas fa-columns me-2 text-primary"></i> Mon tableau de bord</a></li>
+              {% elif user.type == 'participant' %}
+                <li><a class="dropdown-item py-2" href="{% url 'participants:tableau_bord' %}"><i class="fas fa-users me-2 text-primary"></i> Mon espace participant</a></li>
+              {% elif user.type == 'organisateur' %}
+                <li><a class="dropdown-item py-2" href="{% url 'organisateurs:dashboard' %}"><i class="fas fa-tachometer-alt me-2 text-primary"></i> Tableau de bord</a></li>
+              {% else %}
+                <li><a class="dropdown-item py-2" href="{% url 'tournois:liste' %}"><i class="fas fa-trophy me-2 text-primary"></i> Mes tournois</a></li>
+              {% endif %}
+              <li><a class="dropdown-item py-2" href="{% url 'notifications:liste' %}"><i class="fas fa-bell me-2 text-primary"></i> Mes notifications</a></li>
+              {% if user.is_staff %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item py-2" href="/admin/"><i class="fas fa-cog me-2 text-primary"></i> Administration</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item py-2" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2 text-danger"></i> Déconnexion</a></li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="/login/" class="btn btn-outline-primary me-2">
+            <i class="fas fa-sign-in-alt me-1"></i> <span class="d-none d-sm-inline">Connexion</span>
+          </a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-1"></i> <span class="d-none d-sm-inline">S'inscrire</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Search Modal -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="searchModalLabel"><i class="fas fa-search me-2"></i>Rechercher</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form action="{% url 'tournois:liste' %}" method="get">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control form-control-lg" name="q" placeholder="Rechercher un tournoi..." aria-label="Rechercher un tournoi">
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="fw-bold me-2">Suggestions :</span>
+            <a href="{% url 'tournois:liste' %}?type=championnat" class="badge bg-light text-dark text-decoration-none p-2">Championnats</a>
+            <a href="{% url 'tournois:liste' %}?status=en_cours" class="badge bg-light text-dark text-decoration-none p-2">Tournois en cours</a>
+            <a href="{% url 'tournois:liste' %}?sort=recent" class="badge bg-light text-dark text-decoration-none p-2">Récemment ajoutés</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Function to initialize the notification manager
+function initNotificationManager() {
+  if (typeof NotificationManager !== 'undefined') {
+    console.log('Initializing NotificationManager');
+    // Create notification manager instance
+    const notificationManager = new NotificationManager({
+      refreshInterval: 30000, // Check every 30 seconds
+      notificationBadgeSelector: '#notification-badge',
+      notificationBellSelector: '#notification-bell',
+      notificationListSelector: '#navbar-notification-list',
+      apiUrl: '{% url "notifications:get_notifications_ajax" %}',
+      soundEnabled: true
+    });
+    return true;
+  }
+  return false;
+}
+
+// Try to initialize immediately if script is already loaded
+if (!initNotificationManager()) {
+  // If not successful, listen for the notificationsReady event
+  document.addEventListener('notificationsReady', function() {
+    console.log('notificationsReady event received');
+    initNotificationManager();
+  });
+  
+  // Fallback: try again after a delay in case the event doesn't fire
+  setTimeout(function() {
+    if (!window.notificationManagerInitialized) {
+      console.log('Fallback: trying to initialize NotificationManager');
+      initNotificationManager();
+    }
+  }, 2000);
+}
+
+// Add shadow to navbar on scroll
+window.addEventListener('scroll', function() {
+  const navbar = document.querySelector('.navbar');
+  if (window.scrollY > 10) {
+    navbar.classList.add('shadow');
+  } else {
+    navbar.classList.remove('shadow');
+  }
+});
+</script>
+
+<style>
+    .navbar {
+        transition: all 0.3s ease;
+        padding: 15px 0;
+    }
+    
+    .navbar.shadow {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.4rem;
+        transition: all 0.2s ease;
+    }
+    
+    .navbar-brand:hover {
+        transform: translateY(-2px);
+    }
+    
+    .notification-footer a:hover {
+        color: #1e3799;
+        text-decoration: underline;
+    }
+    
+    /* Styles for grouped notifications */
+    .notification-group {
+        margin-bottom: 8px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .notification-group-header {
+        font-size: 14px;
+        background-color: rgba(74, 105, 189, 0.05);
+        border-bottom: 1px solid #eee;
+        padding: 8px 12px;
+    }
+    
+    .notification-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .notification-item:hover {
+        background-color: rgba(74, 105, 189, 0.05);
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-badge {
+        position: absolute;
+        top: -3px;
+        right: -4px;
+        font-size: 0.7rem;
+        background-color: #e53e3e;
+        color: white;
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        animation: pulse 1.5s infinite;
+        font-weight: bold;
+        z-index: 1;
+    }
+    
+    .dropdown-item {
+        transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+        background-color: rgba(74, 105, 189, 0.05);
+        transform: translateX(5px);
+    }
+    
+    @media (max-width: 991.98px) {
+        .navbar-nav {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .navbar-nav .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+    }
+</style>

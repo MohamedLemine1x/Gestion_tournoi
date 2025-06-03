@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Test d'envoi d'email{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-gradient-primary text-white border-0 rounded-top-4">
+                    <h4 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>Test de configuration email
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>À propos de cet outil</h5>
+                        <p>Cette page vous permet de tester la configuration email de l'application. Utilisez-la pour vérifier que les emails sont correctement envoyés.</p>
+                    </div>
+
+                    <!-- Configuration actuelle -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-cogs me-2 text-primary"></i>Configuration actuelle</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <tbody>
+                                    {% for key, value in email_config.items %}
+                                    <tr>
+                                        <th style="width: 40%">{{ key }}</th>
+                                        <td>{{ value }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de test -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-paper-plane me-2 text-primary"></i>Envoyer un email de test</h5>
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="email_test" class="form-label">Adresse email de test</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email_test" name="email_test" 
+                                        value="{{ user_email }}" required>
+                                    <div class="invalid-feedback">
+                                        Veuillez entrer une adresse email valide.
+                                    </div>
+                                </div>
+                                <div class="form-text">Un email de test sera envoyé à cette adresse.</div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Envoyer l'email de test
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Conseils de dépannage -->
+                    <div class="mt-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-tools me-2 text-primary"></i>Conseils de dépannage</h5>
+                        <div class="accordion" id="troubleshootingAccordion">
+                            <div class="accordion-item border-0 mb-2 shadow-sm">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                        Les emails ne sont pas envoyés
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#troubleshootingAccordion">
+                                    <div class="accordion-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i>Vérifiez que vous avez correctement configuré votre serveur SMTP.</li>
+                                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i>Si vous utilisez Gmail, assurez-vous d'avoir activé l'option "Autoriser les applications moins sécurisées".</li>
+                                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i>Vérifiez que le mot de passe de l'application est correct.</li>
+                                            <li class="list-group-item bg-transparent"><i class="fas fa-check-circle text-success me-2"></i>Consultez les journaux d'erreurs pour plus de détails.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item border-0 mb-2 shadow-sm">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Configuration avec Gmail
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#troubleshootingAccordion">
+                                    <div class="accordion-body">
+                                        <ol class="list-group list-group-flush">
+                                            <li class="list-group-item bg-transparent">Activez la vérification en deux étapes sur votre compte Google.</li>
+                                            <li class="list-group-item bg-transparent">Créez un mot de passe d'application spécifique pour cette application.</li>
+                                            <li class="list-group-item bg-transparent">Utilisez ce mot de passe d'application dans votre configuration Django.</li>
+                                        </ol>
+                                        <div class="mt-3">
+                                            <a href="https://support.google.com/accounts/answer/185833" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-external-link-alt me-1"></i>Guide Google pour les mots de passe d'application
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'equipes:liste_equipes' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste des équipes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+}
+.rounded-4 {
+    border-radius: 16px !important;
+}
+.rounded-top-4 {
+    border-top-left-radius: 16px !important;
+    border-top-right-radius: 16px !important;
+}
+.accordion-button:not(.collapsed) {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(13, 110, 253, 0.25);
+}
+</style>
+{% endblock %} 

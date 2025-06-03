@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ match.equipe_a.nom }} vs {{ match.equipe_b.nom }} | TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .match-detail-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .match-header {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .match-date {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .match-teams {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem 1rem;
+    }
+    
+    @media (min-width: 768px) {
+        .match-teams {
+            flex-direction: row;
+        }
+    }
+    
+    .team-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        padding: 1rem;
+    }
+    
+    .team-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+        border: 2px solid #dee2e6;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .team-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .vs-badge {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #6c757d;
+        margin: 1rem 2rem;
+    }
+    
+    .match-score {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+    }
+    
+    .score-box {
+        font-size: 2rem;
+        font-weight: 700;
+        padding: 0.5rem 1.5rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin: 0 0.5rem;
+        min-width: 60px;
+        text-align: center;
+    }
+    
+    .score-separator {
+        font-size: 1.5rem;
+        margin: 0 0.5rem;
+        color: #6c757d;
+    }
+    
+    .match-details-section {
+        padding: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .detail-item {
+        display: flex;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .detail-label {
+        flex: 1;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .detail-value {
+        flex: 2;
+        color: #212529;
+    }
+    
+    .match-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .match-status {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 50rem;
+    }
+    
+    .status-upcoming {
+        background-color: #cff4fc;
+        color: #055160;
+    }
+    
+    .status-completed {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .status-ongoing {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- Breadcrumbs -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'matchs:liste' %}">Matchs</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Détails du match</li>
+                </ol>
+            </nav>
+            
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Carte de détails du match -->
+            <div class="card match-detail-card">
+                <!-- En-tête avec la date et le lieu -->
+                <div class="match-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="match-date">
+                                <i class="fas fa-calendar-day me-2"></i>
+                                {{ match.date|date:"l d F Y" }}
+                            </div>
+                            <div>
+                                <i class="fas fa-clock me-2"></i>
+                                {{ match.date|date:"H:i" }}
+                                {% if match.lieu %}
+                                    <span class="ms-3">
+                                        <i class="fas fa-map-marker-alt me-2"></i>
+                                        {{ match.lieu }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            {% if match.termine %}
+                                <span class="badge bg-success">Match terminé</span>
+                            {% else %}
+                                {% if match.date > now %}
+                                    <span class="badge bg-info">À venir</span>
+                                {% else %}
+                                    <span class="badge bg-warning">En cours</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informations des équipes -->
+                <div class="match-teams">
+                    <div class="team-info">
+                        {% if match.equipe_a.logo %}
+                            <img src="{{ match.equipe_a.logo.url }}" alt="{{ match.equipe_a.nom }}" class="team-logo">
+                        {% else %}
+                            <div class="team-logo">
+                                <i class="fas fa-users fa-2x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                        <div class="team-name">{{ match.equipe_a.nom }}</div>
+                        <div class="text-muted">Domicile</div>
+                    </div>
+                    
+                    <div class="vs-badge">VS</div>
+                    
+                    <div class="team-info">
+                        {% if match.equipe_b.logo %}
+                            <img src="{{ match.equipe_b.logo.url }}" alt="{{ match.equipe_b.nom }}" class="team-logo">
+                        {% else %}
+                            <div class="team-logo">
+                                <i class="fas fa-users fa-2x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                        <div class="team-name">{{ match.equipe_b.nom }}</div>
+                        <div class="text-muted">Extérieur</div>
+                    </div>
+                </div>
+                
+                <!-- Affichage du score -->
+                {% if match.termine or match.score_equipe_a is not None %}
+                <div class="match-score">
+                    <div class="score-box">{{ match.score_equipe_a|default:"?" }}</div>
+                    <div class="score-separator">-</div>
+                    <div class="score-box">{{ match.score_equipe_b|default:"?" }}</div>
+                </div>
+                {% endif %}
+                
+                <!-- Détails supplémentaires -->
+                <div class="match-details-section">
+                    <h5 class="mb-3">Informations</h5>
+                    
+                    {% if match.tournoi %}
+                    <div class="detail-item">
+                        <div class="detail-label">Tournoi</div>
+                        <div class="detail-value">
+                            <a href="{% url 'tournois:detail' match.tournoi.id %}">{{ match.tournoi.nom }}</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="detail-item">
+                        <div class="detail-label">Type</div>
+                        <div class="detail-value">Match amical</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Date</div>
+                        <div class="detail-value">{{ match.date|date:"d/m/Y à H:i" }}</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Lieu</div>
+                        <div class="detail-value">
+                            {{ match.lieu|default:"Non spécifié" }}
+                            {% if match.lieu %}
+                            <a href="https://maps.google.com/?q={{ match.lieu }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                                <i class="fas fa-map-marked-alt"></i> Voir sur la carte
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Statut</div>
+                        <div class="detail-value">
+                            {% if match.termine %}
+                                <span class="match-status status-completed">Match terminé</span>
+                            {% else %}
+                                {% if match.date > now %}
+                                    <span class="match-status status-upcoming">À venir</span>
+                                {% else %}
+                                    <span class="match-status status-ongoing">En cours</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="match-actions">
+                    <div>
+                        <a href="{% url 'matchs:liste' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Retour aux matchs
+                        </a>
+                    </div>
+                    
+                    <div>
+                        {% if not match.termine and request.user.is_authenticated and request.user.type == 'responsable' %}
+                            {% if request.user.responsable_profile.equipe_geree == match.equipe_a or request.user.responsable_profile.equipe_geree == match.equipe_b %}
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enregistrerResultatModal">
+                                    <i class="fas fa-plus-circle me-1"></i> Enregistrer le résultat
+                                </button>
+                                <a href="{% url 'matchs:modifier' match.id %}" class="btn btn-warning">
+                                    <i class="fas fa-edit me-1"></i> Modifier
+                                </a>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#supprimerMatchModal">
+                                    <i class="fas fa-trash-alt me-1"></i> Supprimer
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour enregistrer le résultat -->
+{% if not match.termine and request.user.is_authenticated and request.user.type == 'responsable' %}
+    {% if request.user.responsable_profile.equipe_geree == match.equipe_a or request.user.responsable_profile.equipe_geree == match.equipe_b %}
+    <div class="modal fade" id="enregistrerResultatModal" tabindex="-1" aria-labelledby="enregistrerResultatModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="enregistrerResultatModalLabel">Enregistrer le résultat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'matchs:enregistrer_resultat' match.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-5 text-center">
+                                <label for="score_a" class="form-label">{{ match.equipe_a.nom }}</label>
+                                <input type="number" class="form-control form-control-lg text-center" id="score_a" name="score_a" value="0" min="0" required>
+                            </div>
+                            <div class="col-2 text-center">
+                                <span class="fs-4 fw-bold">-</span>
+                            </div>
+                            <div class="col-5 text-center">
+                                <label for="score_b" class="form-label">{{ match.equipe_b.nom }}</label>
+                                <input type="number" class="form-control form-control-lg text-center" id="score_b" name="score_b" value="0" min="0" required>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i> Une fois le résultat enregistré, le match sera marqué comme terminé.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour supprimer le match -->
+    <div class="modal fade" id="supprimerMatchModal" tabindex="-1" aria-labelledby="supprimerMatchModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supprimerMatchModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer ce match ?</p>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-1"></i> Cette action est irréversible.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form action="{% url 'matchs:supprimer' match.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %} 

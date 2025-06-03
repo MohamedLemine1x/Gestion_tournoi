@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Ajouter un membre{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-plus"></i> 
+                        Ajouter un membre à {{ equipe.nom }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Membres actuels :</strong> {{ membres_actuels }}/20
+                        {% if not peut_ajouter %}
+                        <br><strong class="text-warning">Attention :</strong> Votre équipe a atteint la limite de 20 membres.
+                        {% endif %}
+                    </div>
+                    
+                    {% if peut_ajouter %}
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email du joueur</label>
+                            <div class="input-group">
+                                <input type="email" name="email" id="email" class="form-control" 
+                                       placeholder="exemple@email.com" required>
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search"></i> Rechercher
+                                </button>
+                            </div>
+                            <div class="form-text">Entrez l'email d'un utilisateur inscrit sur la plateforme.</div>
+                        </div>
+                    </form>
+                    
+                    {% if search_performed %}
+                        {% if search_results %}
+                        <div class="alert alert-success">
+                            <h6>Résultats de la recherche pour "{{ search_term }}"</h6>
+                            <div class="list-group mt-3">
+                                {% for user in search_results %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ user.email }}</small>
+                                    </div>
+                                    <a href="{% url 'responsables:selectionner_position' equipe.id user.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus"></i> Sélectionner
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <p>Aucun utilisateur trouvé pour "{{ search_term }}".</p>
+                            <small>Assurez-vous que l'utilisateur est inscrit sur la plateforme et qu'il n'est pas déjà membre de votre équipe.</small>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    {% endif %}
+                    
+                    <div class="mt-3 d-flex justify-content-between">
+                        <a href="{% url 'responsables:gestion_membres' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la gestion des membres
+                        </a>
+                         <a href="{% url 'responsables:tableau_bord' %}" class="btn btn-info">
+                            <i class="fas fa-chart-bar"></i> Tableau de bord
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

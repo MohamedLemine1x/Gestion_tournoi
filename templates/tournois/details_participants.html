@@ -1,0 +1,917 @@
+{% extends 'base.html' %}
+
+{% block title %}Détails des participants - {{ tournoi.nom }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- En-tête avec statut du tournoi -->
+    <div class="card border-0 shadow-sm mb-4 participants-header">
+        <div class="card-body position-relative p-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <nav aria-label="breadcrumb" class="mb-2">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{% url 'organisateurs:dashboard' %}" class="text-decoration-none"><i class="fas fa-tachometer-alt me-1"></i>Tableau de bord</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'tournois:detail' pk=tournoi.id %}" class="text-decoration-none">{{ tournoi.nom }}</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Participants</li>
+                        </ol>
+                    </nav>
+                    
+                    <h1 class="display-6 mb-2 d-flex align-items-center">
+                        <div class="icon-container me-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        Participants du tournoi <span class="fw-bold ms-2">{{ tournoi.nom }}</span>
+                    </h1>
+                    
+                    <div class="d-flex flex-wrap mt-3 participants-quick-info">
+                        <div class="quick-info-item">
+                            <i class="fas fa-users-cog text-primary"></i>
+                            <span>{{ nombre_equipes }} équipes</span>
+                        </div>
+                        <div class="quick-info-item">
+                            <i class="fas fa-calendar-alt text-danger"></i>
+                            <span>
+                                {{ tournoi.date_debut|date:"d/m/Y" }} 
+                                {% if tournoi.date_fin %}- {{ tournoi.date_fin|date:"d/m/Y" }}{% endif %}
+                            </span>
+                        </div>
+                        <div class="quick-info-item">
+                            <i class="fas fa-map-marker-alt text-success"></i>
+                            <span>{{ tournoi.lieu|default:"Lieu non défini" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <div class="d-flex flex-column flex-sm-row justify-content-lg-end gap-2">
+                        {% if tournoi.equipes.exists %}
+                        <a href="#" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+                            <i class="fas fa-file-export me-2"></i>Exporter
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'tournois:detail' pk=tournoi.id %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour au tournoi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-alert {% if tournoi.est_termine %}alert-secondary{% elif tournoi.date_debut <= today %}alert-success{% else %}alert-info{% endif %}">
+            <i class="fas {% if tournoi.est_termine %}fa-flag-checkered{% elif tournoi.date_debut <= today %}fa-play-circle{% else %}fa-clock{% endif %} me-2"></i>
+            <span>
+                {% if tournoi.est_termine %}
+                    Tournoi terminé
+                {% elif tournoi.date_debut <= today %}
+                    Tournoi en cours
+                {% else %}
+                    Tournoi à venir
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    
+    <!-- Recherche et filtres -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" id="searchParticipants" class="form-control border-start-0" placeholder="Rechercher une équipe ou un participant...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="sortParticipants">
+                        <option value="nom">Trier par nom</option>
+                        <option value="date">Trier par date d'inscription</option>
+                        <option value="membres">Trier par nombre de membres</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Compteur d'équipes -->
+    <div class="teams-counter mb-3">
+        <div class="d-flex align-items-center">
+            <div class="teams-count-badge me-2">
+                {{ nombre_equipes }}
+            </div>
+            <h5 class="mb-0">Équipes inscrites</h5>
+        </div>
+        <div class="teams-counter-line"></div>
+    </div>
+    
+    <!-- Liste des équipes avec accordéon -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="accordion" id="accordionEquipes">
+                {% for equipe_detail in equipes_details %}
+                <div class="accordion-item mb-3 border-0 shadow-sm team-card">
+                    <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} rounded-3" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" 
+                                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                                aria-controls="collapse{{ forloop.counter }}">
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                                <div class="d-flex align-items-center">
+                                    <div class="team-avatar me-3">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold team-name">{{ equipe_detail.equipe.nom }}</span>
+                                        <div class="team-badges">
+                                            <span class="badge bg-primary rounded-pill">
+                                                <i class="fas fa-users me-1"></i>{{ equipe_detail.nombre_membres }}
+                                            </span>
+                                            <span class="badge bg-secondary rounded-pill">
+                                                <i class="fas fa-calendar-check me-1"></i>{{ equipe_detail.date_inscription|date:"d/m/Y" }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                         aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#accordionEquipes">
+                        <div class="accordion-body">
+                            <!-- Informations sur l'équipe et le responsable -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="card border-0 bg-light rounded-4">
+                                        <div class="card-body p-4">
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <h5 class="card-title d-flex align-items-center mb-3">
+                                                        <div class="icon-sm bg-primary-soft text-primary me-2">
+                                                            <i class="fas fa-user-tie"></i>
+                                                        </div>
+                                                        Responsable de l'équipe
+                                                    </h5>
+                                                    <div class="contact-card">
+                                                        <div class="contact-info">
+                                                            <div class="contact-label">Nom</div>
+                                                            <div class="contact-value">{{ equipe_detail.responsable.user.get_full_name|default:equipe_detail.responsable.user.username }}</div>
+                                                        </div>
+                                                        <div class="contact-info">
+                                                            <div class="contact-label">Email</div>
+                                                            <div class="contact-value">{{ equipe_detail.responsable.user.email }}</div>
+                                                        </div>
+                                                        <div class="contact-info">
+                                                            <div class="contact-label">Téléphone</div>
+                                                            <div class="contact-value">{{ equipe_detail.responsable.telephone|default:"Non renseigné" }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mt-4 mt-lg-0">
+                                                    <h5 class="card-title d-flex align-items-center mb-3">
+                                                        <div class="icon-sm bg-success-soft text-success me-2">
+                                                            <i class="fas fa-info-circle"></i>
+                                                        </div>
+                                                        Informations d'équipe
+                                                    </h5>
+                                                    <div class="team-stats">
+                                                        <div class="stat-item">
+                                                            <div class="stat-value">{{ equipe_detail.nombre_membres }}</div>
+                                                            <div class="stat-label">Membres</div>
+                                                        </div>
+                                                        <div class="stat-item">
+                                                            <div class="stat-value">{{ equipe_detail.matchs_joues|default:0 }}</div>
+                                                            <div class="stat-label">Matchs joués</div>
+                                                        </div>
+                                                        <div class="stat-item">
+                                                            <div class="stat-value">{{ equipe_detail.date_inscription|date:"d/m/Y" }}</div>
+                                                            <div class="stat-label">Date d'inscription</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Liste des membres -->
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                                    <h5 class="d-flex align-items-center">
+                                        <div class="icon-sm bg-success-soft text-success me-2">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        Liste des membres
+                                        <span class="badge bg-success rounded-pill ms-2">{{ equipe_detail.membres|length }}</span>
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="border-0">#</th>
+                                                    <th class="border-0">Nom</th>
+                                                    <th class="border-0">Position</th>
+                                                    <th class="border-0">Date d'ajout</th>
+                                                    <th class="border-0">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for membre in equipe_detail.membres %}
+                                                <tr>
+                                                    <td>{{ forloop.counter }}</td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-xs me-2">
+                                                                <i class="fas fa-user"></i>
+                                                            </div>
+                                                            {{ membre.utilisateur.get_full_name|default:membre.utilisateur.username }}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {% if membre.position %}
+                                                            <span class="badge bg-light text-dark">{{ membre.position }}</span>
+                                                        {% else %}
+                                                            <span class="text-muted">Non définie</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ membre.date_ajout|date:"d/m/Y" }}</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary view-profile-btn" 
+                                                                data-id="{{ membre.id }}"
+                                                                aria-label="Voir le profil">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        
+                                                        <!-- Modal Profil Joueur (placed outside the table for better stability) -->
+                                                        <div class="member-profile-container" id="profileContainer{{ membre.id }}" style="display: none;">
+                                                            <div class="member-profile-backdrop"></div>
+                                                            <div class="member-profile-content">
+                                                                <div class="member-profile-header">
+                                                                    <h5>
+                                                                        <i class="fas fa-user-circle me-2"></i>
+                                                                        Profil de {{ membre.utilisateur.get_full_name|default:membre.utilisateur.username }}
+                                                                    </h5>
+                                                                    <button type="button" class="close-profile-btn" data-id="{{ membre.id }}">
+                                                                        <i class="fas fa-times"></i>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="member-profile-body">
+                                                                    <div class="text-center mb-4">
+                                                                        <div class="profile-avatar mx-auto mb-3">
+                                                                            {% if membre.utilisateur.profile and membre.utilisateur.profile.avatar %}
+                                                                            <img src="{{ membre.utilisateur.profile.avatar.url }}" alt="Avatar" class="rounded-circle img-thumbnail">
+                                                                            {% else %}
+                                                                            <div class="avatar-placeholder">
+                                                                                <i class="fas fa-user"></i>
+                                                                            </div>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                        <h4 class="mb-1">{{ membre.utilisateur.get_full_name|default:membre.utilisateur.username }}</h4>
+                                                                        <p class="text-muted">
+                                                                            <span class="badge bg-primary">{{ membre.position|default:"Membre" }}</span>
+                                                                        </p>
+                                                                    </div>
+                                                                    <div class="profile-info">
+                                                                        <div class="info-item">
+                                                                            <div class="info-label">EMAIL</div>
+                                                                            <div class="info-value">{{ membre.utilisateur.email }}</div>
+                                                                        </div>
+                                                                        <div class="info-item">
+                                                                            <div class="info-label">DATE D'AJOUT À L'ÉQUIPE</div>
+                                                                            <div class="info-value">{{ membre.date_ajout|date:"d/m/Y" }}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="member-profile-footer">
+                                                                    <button type="button" class="btn btn-secondary close-profile-btn" data-id="{{ membre.id }}">
+                                                                        Fermer
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4">
+                                                        <div class="empty-state">
+                                                            <div class="empty-icon mb-3">
+                                                                <i class="fas fa-users-slash"></i>
+                                                            </div>
+                                                            <p>Aucun membre n'a été ajouté à cette équipe</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state-container shadow-sm rounded-4 p-5 text-center">
+                    <div class="empty-icon mb-4">
+                        <i class="fas fa-users-slash"></i>
+                    </div>
+                    <h4>Aucune équipe inscrite</h4>
+                    <p class="text-muted mb-4">Ce tournoi n'a pas encore d'équipes inscrites. Les équipes apparaîtront ici une fois qu'elles seront inscrites.</p>
+                    <a href="{% url 'tournois:detail' pk=tournoi.id %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour au tournoi
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'export -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Exporter les données</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p>Choisissez le format d'exportation des données des participants :</p>
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-file-excel me-2"></i>Exporter en Excel (.xlsx)
+                    </a>
+                    <a href="#" class="btn btn-outline-danger">
+                        <i class="fas fa-file-pdf me-2"></i>Exporter en PDF
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary">
+                        <i class="fas fa-file-csv me-2"></i>Exporter en CSV
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles pour l'en-tête */
+    .participants-header {
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .icon-container {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .participants-quick-info {
+        gap: 10px;
+    }
+    
+    .quick-info-item {
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-radius: 30px;
+        padding: 6px 15px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .quick-info-item i {
+        margin-right: 8px;
+    }
+    
+    .card-alert {
+        position: absolute;
+        top: 0;
+        right: 20px;
+        padding: 6px 15px;
+        border-radius: 0 0 10px 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: white;
+        z-index: 10;
+    }
+    
+    .alert-info {
+        background-color: #0dcaf0;
+    }
+    
+    .alert-success {
+        background-color: #198754;
+    }
+    
+    .alert-secondary {
+        background-color: #6c757d;
+    }
+    
+    /* Compteur d'équipes */
+    .teams-counter {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .teams-count-badge {
+        width: 40px;
+        height: 40px;
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+    
+    .teams-counter-line {
+        flex-grow: 1;
+        height: 2px;
+        background-color: #e9ecef;
+        margin-left: 1rem;
+    }
+    
+    /* Styles pour les cartes d'équipes */
+    .team-card {
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+    
+    .team-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .accordion-button {
+        padding: 1rem 1.5rem;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(13, 110, 253, 0.05);
+        color: #0d6efd;
+    }
+    
+    .team-avatar {
+        width: 45px;
+        height: 45px;
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .team-name {
+        font-size: 1.05rem;
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+    
+    .team-badges {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.4em 0.8em;
+    }
+    
+    /* Carte de contact */
+    .contact-card {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .contact-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 2px;
+    }
+    
+    .contact-value {
+        font-weight: 500;
+    }
+    
+    /* Statistiques d'équipe */
+    .team-stats {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .stat-item {
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Icônes dans les titres */
+    .icon-sm {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    
+    .bg-primary-soft {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .bg-success-soft {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+    
+    /* Avatar pour les membres */
+    .avatar-xs {
+        width: 24px;
+        height: 24px;
+        background-color: #e9ecef;
+        color: #6c757d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+    }
+    
+    /* État vide */
+    .empty-state-container {
+        background-color: white;
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto;
+    }
+    
+    .empty-state .empty-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    /* Styles responsive */
+    @media (max-width: 576px) {
+        .team-stats {
+            flex-direction: column;
+        }
+        
+        .stat-item {
+            width: 100%;
+        }
+        
+        .quick-info-item {
+            font-size: 0.8rem;
+        }
+        
+        .icon-container {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+    }
+
+    /* Styles pour le modal profil joueur */
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto;
+        position: relative;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 2rem;
+    }
+    
+    .profile-info {
+        border-top: 1px solid #e9ecef;
+        margin-top: 15px;
+        padding-top: 15px;
+    }
+    
+    .info-item {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed rgba(0,0,0,0.05);
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .info-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .info-value {
+        font-weight: 500;
+    }
+    
+    .modal-backdrop {
+        opacity: 0.5 !important;
+    }
+    
+    .modal-content {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-footer {
+        border-top: none;
+        padding: 15px 20px;
+    }
+    
+    /* Prevent modal flickering */
+    .modal.fade {
+        transition: opacity 0.2s linear !important;
+    }
+    
+    .modal.show {
+        opacity: 1;
+        display: block !important;
+        z-index: 1050 !important;
+    }
+    
+    /* Fix for modal backdrop */
+    body.modal-open {
+        overflow: hidden;
+        padding-right: 0 !important;
+    }
+    
+    /* Additional styles to ensure modals render properly */
+    .modal-dialog {
+        margin: 1.75rem auto !important;
+        transform: none !important;
+    }
+    
+    .modal-backdrop.show {
+        opacity: 0.5 !important;
+        z-index: 1040 !important;
+    }
+
+    /* Custom Profile Modal Styles */
+    .member-profile-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2000;
+        display: none;
+    }
+    
+    .member-profile-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+    
+    .member-profile-content {
+        position: relative;
+        width: 90%;
+        max-width: 500px;
+        margin: 50px auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        z-index: 2001;
+    }
+    
+    .member-profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #0d6efd;
+        color: white;
+        padding: 15px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .member-profile-header .close-profile-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    
+    .member-profile-body {
+        padding: 20px;
+    }
+    
+    .member-profile-footer {
+        padding: 15px 20px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltipTriggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggers.forEach(trigger => {
+            if (window.bootstrap && bootstrap.Tooltip) {
+                new bootstrap.Tooltip(trigger);
+            }
+        });
+        
+        // Handle view profile buttons
+        const profileButtons = document.querySelectorAll('.view-profile-btn');
+        profileButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get the member ID and find the profile container
+                const memberId = this.getAttribute('data-id');
+                const profileContainer = document.getElementById('profileContainer' + memberId);
+                
+                // Show the profile
+                if (profileContainer) {
+                    profileContainer.style.display = 'block';
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling
+                }
+            });
+        });
+        
+        // Handle close profile buttons
+        const closeButtons = document.querySelectorAll('.close-profile-btn');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get the member ID and find the profile container
+                const memberId = this.getAttribute('data-id');
+                const profileContainer = document.getElementById('profileContainer' + memberId);
+                
+                // Hide the profile
+                if (profileContainer) {
+                    profileContainer.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            });
+        });
+        
+        // Close profile when clicking on backdrop
+        const profileContainers = document.querySelectorAll('.member-profile-container');
+        profileContainers.forEach(container => {
+            const backdrop = container.querySelector('.member-profile-backdrop');
+            if (backdrop) {
+                backdrop.addEventListener('click', function() {
+                    container.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
+                });
+            }
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchParticipants');
+        const teamCards = document.querySelectorAll('.team-card');
+        
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                teamCards.forEach(card => {
+                    const teamName = card.querySelector('.team-name').textContent.toLowerCase();
+                    const members = Array.from(card.querySelectorAll('tbody tr')).map(
+                        row => row.querySelector('td:nth-child(2)') ? 
+                              row.querySelector('td:nth-child(2)').textContent.toLowerCase() : ''
+                    );
+                    
+                    const matchTeam = teamName.includes(searchTerm);
+                    const matchMembers = members.some(member => member.includes(searchTerm));
+                    
+                    if (matchTeam || matchMembers) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Sorting functionality
+        const sortSelect = document.getElementById('sortParticipants');
+        const accordionContainer = document.getElementById('accordionEquipes');
+        
+        if (sortSelect && accordionContainer) {
+            sortSelect.addEventListener('change', function() {
+                const sortValue = this.value;
+                const teamCards = Array.from(document.querySelectorAll('.team-card'));
+                
+                teamCards.sort((a, b) => {
+                    if (sortValue === 'nom') {
+                        const nameA = a.querySelector('.team-name').textContent.toLowerCase();
+                        const nameB = b.querySelector('.team-name').textContent.toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    } else if (sortValue === 'date') {
+                        const dateA = a.querySelector('.badge.bg-secondary').textContent.trim();
+                        const dateB = b.querySelector('.badge.bg-secondary').textContent.trim();
+                        return new Date(dateB.split('').reverse().join('')) - new Date(dateA.split('').reverse().join(''));
+                    } else if (sortValue === 'membres') {
+                        const membersA = parseInt(a.querySelector('.badge.bg-primary').textContent.trim());
+                        const membersB = parseInt(b.querySelector('.badge.bg-primary').textContent.trim());
+                        return membersB - membersA;
+                    }
+                    return 0;
+                });
+                
+                teamCards.forEach(card => {
+                    accordionContainer.appendChild(card);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %} 

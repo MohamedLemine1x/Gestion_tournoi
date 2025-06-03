@@ -1,0 +1,612 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load django_bootstrap5 %}
+
+{% block title %}Planifier des matchs - {{ tournoi.nom }}{% endblock %}
+
+{% block content %}
+<!-- En-tête avec bannière et breadcrumb -->
+<div class="bg-light py-3 px-4 mb-4 rounded-3 shadow-sm">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="display-6 mb-0">{{ tournoi.nom }}</h1>
+      <nav aria-label="breadcrumb" class="mt-2">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="{% url 'tournois:liste' %}" class="text-decoration-none"><i class="fas fa-trophy me-1"></i>Tournois</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'tournois:detail' tournoi.id %}" class="text-decoration-none">{{ tournoi.nom }}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Planifier des matchs</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+      <a href="{% url 'tournois:detail' tournoi.id %}" class="btn btn-outline-primary me-2">
+        <i class="fas fa-arrow-left me-1"></i> Retour au tournoi
+      </a>
+      <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#planifierMatchModal">
+        <i class="fas fa-plus me-1"></i> Ajouter un match
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Affichage des messages (succès, erreurs, etc.) -->
+{% if messages %}
+<div id="alert-container" class="container-fluid px-4 mb-4">
+  {% for message in messages %}
+  <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show shadow-sm border-start border-5 
+              {% if message.tags == 'success' %}border-success{% elif message.tags == 'error' %}border-danger{% else %}border-info{% endif %}" 
+       role="alert">
+    <div class="d-flex align-items-center">
+      <div class="me-3 fs-3">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle text-success{% elif message.tags == 'error' %}fa-exclamation-circle text-danger{% else %}fa-info-circle text-info{% endif %}"></i>
+      </div>
+      <div>
+        <h5 class="alert-heading mb-1">
+          {% if message.tags == 'success' %}Succès !{% elif message.tags == 'error' %}Erreur{% else %}Information{% endif %}
+        </h5>
+        <p class="mb-0">{{ message }}</p>
+      </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Statistiques -->
+<div class="row mb-4 px-2">
+  <div class="col-md-4 mb-3">
+    <div class="card bg-primary text-white shadow-sm h-100">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-white-50 mb-1">Total des matchs</h6>
+            <h3 class="mb-0">{{ matchs|length }}</h3>
+          </div>
+          <div class="fs-1 text-white-50">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card bg-success text-white shadow-sm h-100">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-white-50 mb-1">Matchs terminés</h6>
+            <h3 class="mb-0">{{ matchs_termines }}</h3>
+          </div>
+          <div class="fs-1 text-white-50">
+            <i class="fas fa-flag-checkered"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card bg-warning text-dark shadow-sm h-100">
+      <div class="card-body p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="text-dark-50 mb-1">Matchs à venir</h6>
+            <h3 class="mb-0">{{ matchs_a_venir }}</h3>
+          </div>
+          <div class="fs-1 text-dark-50">
+            <i class="fas fa-hourglass-half"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tableau des matchs -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-white p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h4 class="m-0 fs-4"><i class="fas fa-list-ul me-2 text-primary"></i>Matchs planifiés</h4>
+      <div>
+        <div class="btn-group" role="group" aria-label="Filtres">
+          <button type="button" class="btn btn-outline-secondary active" data-filter="all">
+            Tous <span class="badge bg-secondary ms-1">{{ matchs|length }}</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary" data-filter="upcoming">
+            À venir <span class="badge bg-warning text-dark ms-1">{{ matchs_a_venir }}</span>
+          </button>
+          <button type="button" class="btn btn-outline-secondary" data-filter="completed">
+            Terminés <span class="badge bg-success ms-1">{{ matchs_termines }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card-body p-0">
+    {% if matchs|length > 0 %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="matchs-table">
+        <thead class="table-light">
+          <tr>
+            <th scope="col" class="ps-3" style="width: 30%;">Équipes</th>
+            <th scope="col" style="width: 20%;">Date</th>
+            <th scope="col" style="width: 20%;">Lieu</th>
+            <th scope="col" style="width: 15%;">Statut</th>
+            <th scope="col" class="text-center" style="width: 15%;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for match in matchs %}
+          <tr class="match-row {% if match.termine %}completed{% else %}upcoming{% endif %}">
+            <td class="ps-3">
+              <div class="d-flex align-items-center">
+                <div class="team-logo-container me-2">
+                  {% if match.equipe_domicile.logo %}
+                  <img src="{{ match.equipe_domicile.logo.url }}" alt="{{ match.equipe_domicile.nom }}" class="team-logo" width="30" height="30">
+                  {% else %}
+                  <div class="team-logo-placeholder">{{ match.equipe_domicile.nom|slice:":1" }}</div>
+                  {% endif %}
+                </div>
+                <span class="fw-bold text-primary">{{ match.equipe_domicile.nom }}</span>
+                <div class="mx-2 px-2 py-1 rounded bg-light text-center" style="min-width: 60px;">
+                  {% if match.termine %}
+                    <span class="badge bg-light text-dark border">
+                      {{ match.score_domicile|default:"0" }} - {{ match.score_exterieur|default:"0" }}
+                    </span>
+                  {% else %}
+                    <span class="text-muted small">vs</span>
+                  {% endif %}
+                </div>
+                <span class="fw-bold text-primary">{{ match.equipe_exterieur.nom }}</span>
+                <div class="team-logo-container ms-2">
+                  {% if match.equipe_exterieur.logo %}
+                  <img src="{{ match.equipe_exterieur.logo.url }}" alt="{{ match.equipe_exterieur.nom }}" class="team-logo" width="30" height="30">
+                  {% else %}
+                  <div class="team-logo-placeholder">{{ match.equipe_exterieur.nom|slice:":1" }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="calendar-icon me-2 text-muted">
+                  <i class="far fa-calendar-alt"></i>
+                </div>
+                <div>
+                  {{ match.date|date:"d/m/Y" }}
+                  <br>
+                  <small class="text-muted">
+                    <i class="far fa-clock"></i> {{ match.date|date:"H:i" }}
+                  </small>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if match.lieu %}
+                <div class="d-flex align-items-center">
+                  <div class="location-icon me-2 text-muted">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div>{{ match.lieu }}</div>
+                </div>
+              {% else %}
+                <span class="text-muted fst-italic">Non spécifié</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if match.termine %}
+                <div class="d-flex align-items-center">
+                  <span class="badge bg-success text-white" aria-label="Match terminé">
+                    <i class="fas fa-check-circle me-1"></i> Terminé
+                  </span>
+                  
+                  {% if match.score_domicile > match.score_exterieur %}
+                  <span class="badge bg-light text-dark ms-2 border">
+                    <small>Vainqueur: {{ match.equipe_domicile.nom }}</small>
+                  </span>
+                  {% elif match.score_exterieur > match.score_domicile %}
+                  <span class="badge bg-light text-dark ms-2 border">
+                    <small>Vainqueur: {{ match.equipe_exterieur.nom }}</small>
+                  </span>
+                  {% else %}
+                  <span class="badge bg-light text-dark ms-2 border">
+                    <small>Match nul</small>
+                  </span>
+                  {% endif %}
+                </div>
+              {% else %}
+                <span class="badge bg-warning text-dark" aria-label="Match à venir">
+                  <i class="fas fa-hourglass-half me-1"></i> À venir
+                </span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <div class="btn-group" role="group" aria-label="Actions">
+                <a href="{% url 'tournois:detail_match' match.id %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Voir les détails">
+                  <i class="fas fa-eye"></i>
+                </a>
+                {% if not match.termine %}
+                <a href="{% url 'tournois:enregistrer_resultat' match.id %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Enregistrer résultat">
+                  <i class="fas fa-trophy"></i>
+                </a>
+                <a href="{% url 'tournois:supprimer_match' match.id %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Supprimer" 
+                   onclick="return confirmDelete('{{ match.equipe_domicile.nom }}', '{{ match.equipe_exterieur.nom }}')">
+                  <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <div class="empty-state-icon mb-3">
+        <i class="fas fa-calendar-times text-muted fa-5x"></i>
+      </div>
+      <h4 class="text-muted mb-1">Aucun match planifié</h4>
+      <p class="text-muted mb-4">Ce tournoi n'a pas encore de matchs programmés.</p>
+      <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#planifierMatchModal">
+        <i class="fas fa-plus me-1"></i> Ajouter un match
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal pour planifier un match -->
+<div class="modal fade" id="planifierMatchModal" tabindex="-1" aria-labelledby="planifierMatchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="planifierMatchModalLabel">
+          <i class="fas fa-calendar-plus me-2"></i>Planifier un nouveau match
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" novalidate class="needs-validation" id="matchForm">
+          {% csrf_token %}
+          
+          {% if form %}
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="{{ form.equipe_domicile.id_for_label }}" class="form-label fw-bold">{{ form.equipe_domicile.label }}</label>
+              {{ form.equipe_domicile }}
+              {% if form.equipe_domicile.help_text %}
+              <div class="form-text">
+                <i class="fas fa-info-circle me-1 text-primary"></i>
+                {{ form.equipe_domicile.help_text }}
+              </div>
+              {% endif %}
+              {% if form.equipe_domicile.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.equipe_domicile.errors.0 }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.equipe_exterieur.id_for_label }}" class="form-label fw-bold">{{ form.equipe_exterieur.label }}</label>
+              {{ form.equipe_exterieur }}
+              {% if form.equipe_exterieur.help_text %}
+              <div class="form-text">
+                <i class="fas fa-info-circle me-1 text-primary"></i>
+                {{ form.equipe_exterieur.help_text }}
+              </div>
+              {% endif %}
+              {% if form.equipe_exterieur.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.equipe_exterieur.errors.0 }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="{{ form.date.id_for_label }}" class="form-label fw-bold">{{ form.date.label }}</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <i class="far fa-calendar-alt text-primary"></i>
+                </span>
+                {{ form.date }}
+              </div>
+              {% if form.date.help_text %}
+              <div class="form-text">
+                <i class="fas fa-info-circle me-1 text-primary"></i>
+                {{ form.date.help_text }}
+              </div>
+              {% endif %}
+              {% if form.date.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.date.errors.0 }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.lieu.id_for_label }}" class="form-label fw-bold">{{ form.lieu.label }}</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <i class="fas fa-map-marker-alt text-primary"></i>
+                </span>
+                {{ form.lieu }}
+              </div>
+              {% if form.lieu.help_text %}
+              <div class="form-text">
+                <i class="fas fa-info-circle me-1 text-primary"></i>
+                {{ form.lieu.help_text }}
+              </div>
+              {% endif %}
+              {% if form.lieu.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.lieu.errors.0 }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% else %}
+          <!-- Formulaire de secours si form n'est pas disponible -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="equipe_domicile" class="form-label fw-bold">Équipe Domicile</label>
+              <select name="equipe_domicile" id="equipe_domicile" class="form-select" required>
+                <option value="">Sélectionnez une équipe</option>
+                {% for equipe in equipes %}
+                <option value="{{ equipe.id }}">{{ equipe.nom }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="equipe_exterieur" class="form-label fw-bold">Équipe Exterieur</label>
+              <select name="equipe_exterieur" id="equipe_exterieur" class="form-select" required>
+                <option value="">Sélectionnez une équipe</option>
+                {% for equipe in equipes %}
+                <option value="{{ equipe.id }}">{{ equipe.nom }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label for="date" class="form-label fw-bold">Date et heure du match</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <i class="far fa-calendar-alt text-primary"></i>
+                </span>
+                <input type="datetime-local" name="date" id="date" class="form-control" min="{{ now }}" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="lieu" class="form-label fw-bold">Lieu du match</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <i class="fas fa-map-marker-alt text-primary"></i>
+                </span>
+                <input type="text" name="lieu" id="lieu" class="form-control" placeholder="Ex: Stade municipal..." {% if tournoi.lieu %}data-default-lieu="{{ tournoi.lieu }}"{% endif %}>
+              </div>
+              {% if tournoi.lieu %}
+              <div class="form-text">
+                <i class="fas fa-info-circle me-1 text-primary"></i>
+                Lieu par défaut: {{ tournoi.lieu }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i> Annuler
+        </button>
+        <button type="button" class="btn btn-success" onclick="document.getElementById('matchForm').submit();">
+          <i class="fas fa-calendar-check me-1"></i> Planifier le match
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Styles pour les logos des équipes */
+  .team-logo-container {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .team-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .team-logo-placeholder {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #6c757d;
+  }
+  
+  /* Animation pour les alertes */
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .alert {
+    animation: slideInDown 0.3s ease-out;
+  }
+  
+  /* Style pour les statistiques */
+  .card {
+    transition: transform 0.2s;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  
+  /* Style pour les tableaux */
+  #matchs-table tbody tr {
+    transition: background-color 0.15s;
+  }
+  
+  #matchs-table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+  
+  /* Styles pour les icônes */
+  .calendar-icon, .location-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+  }
+  
+  /* Style pour l'état vide */
+  .empty-state-icon {
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #dee2e6;
+  }
+  
+  .match-row.completed {
+    background-color: rgba(25, 135, 84, 0.05);
+  }
+  
+  .match-row.upcoming {
+    background-color: rgba(255, 193, 7, 0.05);
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialiser les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Initialiser les alertes
+    var alertList = [].slice.call(document.querySelectorAll('.alert'));
+    alertList.map(function (alertEl) {
+      return new bootstrap.Alert(alertEl);
+    });
+    
+    // Disparition automatique des alertes après 5 secondes
+    setTimeout(function() {
+      var alerts = document.querySelectorAll('.alert:not(.alert-danger)');
+      alerts.forEach(function(alert) {
+        var bsAlert = bootstrap.Alert.getInstance(alert);
+        if (bsAlert) {
+          bsAlert.close();
+        }
+      });
+    }, 5000);
+    
+    // Préremplir le lieu si le tournoi a un lieu
+    var lieuInput = document.getElementById('lieu');
+    if (lieuInput) {
+      var defaultLieu = lieuInput.getAttribute('data-default-lieu');
+      if (defaultLieu) {
+        lieuInput.value = defaultLieu;
+      }
+    }
+    
+    // Validation côté client
+    var form = document.querySelector('.needs-validation');
+    if (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        
+        // Vérification supplémentaire: équipes différentes
+        var equipeDomicile = document.getElementById('equipe_domicile');
+        var equipeExterieur = document.getElementById('equipe_exterieur');
+        
+        if (equipeDomicile && equipeExterieur && equipeDomicile.value && equipeExterieur.value && equipeDomicile.value === equipeExterieur.value) {
+          event.preventDefault();
+          alert("Les deux équipes ne peuvent pas être identiques.");
+        }
+        
+        form.classList.add('was-validated');
+      }, false);
+    }
+    
+    // Filtre pour les matchs
+    const filterButtons = document.querySelectorAll('[data-filter]');
+    const matchRows = document.querySelectorAll('.match-row');
+    
+    console.log("Boutons de filtre trouvés:", filterButtons.length);
+    console.log("Lignes de matchs trouvées:", matchRows.length);
+    
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Retirer 'active' de tous les boutons
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        // Ajouter 'active' au bouton cliqué
+        button.classList.add('active');
+        
+        const filter = button.getAttribute('data-filter');
+        console.log("Filtre sélectionné:", filter);
+        
+        matchRows.forEach(row => {
+          console.log("Classe de ligne:", row.className);
+          if (filter === 'all') {
+            row.style.display = '';
+          } else if (filter === 'upcoming' && row.classList.contains('upcoming')) {
+            row.style.display = '';
+          } else if (filter === 'completed' && row.classList.contains('completed')) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+  
+  // Fonction pour la confirmation de suppression
+  function confirmDelete(equipeDomicile, equipeExterieur) {
+    return confirm(`Êtes-vous sûr de vouloir supprimer le match ${equipeDomicile} vs ${equipeExterieur} ?\nCette action est irréversible.`);
+  }
+</script>
+{% endblock %}

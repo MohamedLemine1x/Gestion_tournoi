@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer {{ tournoi.nom }}{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-danger text-white py-3">
+        <h3 class="mb-0"><i class="fas fa-trash-alt me-2"></i>Supprimer {{ tournoi.nom }}</h3>
+    </div>
+    <div class="card-body p-4">
+        <div class="alert alert-warning mb-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span>Êtes-vous sûr de vouloir supprimer ce tournoi ? Cette action est irréversible.</span>
+        </div>
+        
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="mb-3">{{ tournoi.nom }}</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            <i class="fas fa-calendar-alt me-2 text-secondary"></i>
+                            <strong>Date :</strong> 
+                            {% if tournoi.date_fin %}
+                                Du {{ tournoi.date_debut|date:"d/m/Y" }} au {{ tournoi.date_fin|date:"d/m/Y" }}
+                            {% else %}
+                                Le {{ tournoi.date_debut|date:"d/m/Y" }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p>
+                            <i class="fas fa-map-marker-alt me-2 text-secondary"></i>
+                            <strong>Lieu :</strong> 
+                            {{ tournoi.lieu|default:"Non spécifié" }}
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            <i class="fas fa-users me-2 text-secondary"></i>
+                            <strong>Équipes :</strong> {{ tournoi.equipes.count }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p>
+                            <i class="fas fa-futbol me-2 text-secondary"></i>
+                            <strong>Matchs :</strong> {{ tournoi.matchs.count|default:"0" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'tournois:detail' tournoi.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-2"></i>Confirmer la suppression
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 8px;
+        border: none;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+    
+    .btn {
+        border-radius: 5px;
+        font-weight: 500;
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .shadow {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+    }
+    
+    .shadow-sm {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+    }
+    
+    .alert {
+        border-radius: 5px;
+        border-left: 4px solid #ffc107;
+    }
+</style>
+{% endblock %}

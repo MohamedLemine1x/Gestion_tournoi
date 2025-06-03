@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord des tournois{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+    
+    .dashboard-card-header {
+        padding: 20px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+    
+    .dashboard-card-body {
+        padding: 20px;
+    }
+    
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+    
+    .bg-primary-light {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+    
+    .bg-success-light {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    
+    .bg-warning-light {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    
+    .bg-info-light {
+        background-color: rgba(23, 162, 184, 0.1);
+    }
+    
+    .text-primary {
+        color: #007bff !important;
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+    }
+    
+    .text-warning {
+        color: #ffc107 !important;
+    }
+    
+    .text-info {
+        color: #17a2b8 !important;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: #6c757d;
+    }
+    
+    .match-item {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: white;
+        transition: all 0.2s ease;
+    }
+    
+    .match-item:hover {
+        background-color: #f8f9fa;
+        border-color: rgba(0,123,255,0.3);
+    }
+    
+    .match-teams {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .match-date {
+        font-size: 13px;
+        color: #6c757d;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 mb-4">Tableau de bord des tournois</h1>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Bienvenue dans votre espace tournois. Vous pouvez gérer ici les tournois que vous avez créés ou auxquels vous êtes inscrit.
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Statistiques -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <h3>{{ nb_tournois_crees }}</h3>
+                            <p class="text-muted">Tournois créés</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h3>{{ nb_tournois_inscrits }}</h3>
+                            <p class="text-muted">Tournois inscrits</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tournois créés -->
+        <div class="col-md-6 col-lg-9 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-trophy"></i> Mes tournois</h5>
+                    <a href="{% url 'tournois:creer' %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-plus"></i> Nouveau tournoi
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if tournois_crees %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Date de début</th>
+                                        <th>Équipes</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tournoi in tournois_crees %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'tournois:detail' pk=tournoi.id %}">
+                                                    {{ tournoi.nom }}
+                                                </a>
+                                            </td>
+                                            <td>{{ tournoi.date_debut }}</td>
+                                            <td>{{ tournoi.inscriptions.count }} / {{ tournoi.nombre_equipes_max }}</td>
+                                            <td>
+                                                {% if tournoi.est_termine %}
+                                                    <span class="badge bg-secondary">Terminé</span>
+                                                {% elif tournoi.date_debut <= today %}
+                                                    <span class="badge bg-success">En cours</span>
+                                                {% else %}
+                                                    <span class="badge bg-primary">À venir</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{% url 'tournois:detail' pk=tournoi.id %}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{% url 'tournois:modifier' pk=tournoi.id %}" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light text-center">
+                            <p>Vous n'avez pas encore créé de tournoi.</p>
+                            <a href="{% url 'tournois:creer' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Créer un tournoi
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournois inscrits (pour les responsables) -->
+    {% if tournois_inscrits %}
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-list"></i> Tournois auxquels je suis inscrit</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Organisateur</th>
+                                        <th>Dates</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tournoi in tournois_inscrits %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'tournois:detail' pk=tournoi.id %}">
+                                                    {{ tournoi.nom }}
+                                                </a>
+                                            </td>
+                                            <td>{{ tournoi.createur.get_full_name }}</td>
+                                            <td>
+                                                {{ tournoi.date_debut }}
+                                                {% if tournoi.date_fin %}
+                                                    au {{ tournoi.date_fin }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if tournoi.est_termine %}
+                                                    <span class="badge bg-secondary">Terminé</span>
+                                                {% elif tournoi.date_debut <= today %}
+                                                    <span class="badge bg-success">En cours</span>
+                                                {% else %}
+                                                    <span class="badge bg-primary">À venir</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{% url 'tournois:detail' pk=tournoi.id %}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{% url 'tournois:resultats' pk=tournoi.id %}" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-poll"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Prochains matchs -->
+    {% if prochains_matchs %}
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0"><i class="fas fa-calendar"></i> Prochains matchs</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Tournoi</th>
+                                        <th>Équipes</th>
+                                        <th>Lieu</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in prochains_matchs %}
+                                        <tr>
+                                            <td>{{ match.date_match }}</td>
+                                            <td>{{ match.tournoi.nom }}</td>
+                                            <td>
+                                                {{ match.equipe_domicile.nom }} vs {{ match.equipe_exterieur.nom }}
+                                            </td>
+                                            <td>{{ match.lieu|default:"À définir" }}</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Détails
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

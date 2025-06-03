@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Liste des équipes | TournoiPRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+    .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .card-img-container {
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .card-img-top {
+        max-height: 140px;
+        max-width: 80%;
+        object-fit: contain;
+    }
+    .team-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.8em;
+    }
+    .team-members {
+        font-size: 0.85rem;
+    }
+    .member-dot {
+        height: 8px;
+        width: 8px;
+        background-color: #4A69BD;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 2px;
+    }
+    .member-dot.empty {
+        background-color: #dee2e6;
+    }
+    .search-container {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .search-container .form-control {
+        padding-right: 40px;
+        border-radius: 20px;
+    }
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    .filter-badge {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .filter-badge:hover, .filter-badge.active {
+        background-color: #4A69BD !important;
+        color: white !important;
+    }
+    .no-teams {
+        padding: 3rem;
+        border-radius: 10px;
+        background: radial-gradient(circle at center, #f8f9fa 0%, #e9ecef 100%);
+    }
+    .card-title {
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .animate-card {
+        animation: fadeInUp 0.5s;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 30px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+    
+    .card-footer {
+        background-color: rgba(0,0,0,0.01);
+    }
+    
+    .team-description {
+        height: 60px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .default-team-logo {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #fff;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4A69BD, #89A4D9);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="mb-0">Liste des équipes</h1>
+            <p class="text-muted">Découvrez toutes les équipes disponibles</p>
+        </div>
+        <div class="col-md-6">
+            <div class="search-container">
+                <input type="text" id="teamSearch" class="form-control" placeholder="Rechercher une équipe...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            <span class="filter-badge badge bg-light text-dark active" data-filter="all">Toutes</span>
+            <span class="filter-badge badge bg-light text-dark" data-filter="places-disponibles">Places disponibles</span>
+            <span class="filter-badge badge bg-light text-dark" data-filter="equipes-completes">Équipes complètes</span>
+        </div>
+    </div>
+    
+    {% if equipes %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="equipesContainer">
+            {% for equipe in equipes %}
+                <div class="col animate-card" style="animation-delay: {{ forloop.counter0|divisibleby:3 }}00ms;" data-team-name="{{ equipe.nom|lower }}" data-places="{{ equipe.nombre_membres }}">
+                    <div class="card team-card position-relative">
+                        {% if equipe.est_complete %}
+                            <span class="team-badge badge rounded-pill bg-danger">Équipe complète</span>
+                        {% elif equipe.nombre_membres >= 15 %}
+                            <span class="team-badge badge rounded-pill bg-warning">Presque complète</span>
+                        {% else %}
+                            <span class="team-badge badge rounded-pill bg-success">Places disponibles</span>
+                        {% endif %}
+                        
+                        <div class="card-img-container p-3">
+                            {% if equipe.logo %}
+                                <img src="{{ equipe.logo.url }}" class="card-img-top" alt="Logo de {{ equipe.nom }}">
+                            {% else %}
+                                <div class="default-team-logo">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body">
+                            <h5 class="card-title" title="{{ equipe.nom }}">{{ equipe.nom }}</h5>
+                            
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user-shield text-primary me-2"></i>
+                                <p class="card-text text-muted mb-0">{{ equipe.responsable.user.get_full_name|default:equipe.responsable.user.username }}</p>
+                            </div>
+                            
+                            <div class="team-description mb-3">
+                                {% if equipe.description %}
+                                    {{ equipe.description|truncatechars:120 }}
+                                {% else %}
+                                    <span class="text-muted">Aucune description disponible</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="team-members d-flex align-items-center">
+                                <i class="fas fa-users me-2 text-primary"></i>
+                                <span class="me-2">{{ equipe.nombre_membres }}/20</span>
+                                <div class="flex-grow-1">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                            style="width: {% widthratio equipe.nombre_membres 20 100 %}%" 
+                                            aria-valuenow="{{ equipe.nombre_membres }}" 
+                                            aria-valuemin="0" aria-valuemax="20"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Créée {{ equipe.date_creation|timesince }}</small>
+                            <a href="{% url 'equipes:detail_equipe' equipe.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>Voir l'équipe
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-teams text-center">
+            <i class="fas fa-users fa-4x mb-3 text-muted"></i>
+            <h4>Aucune équipe disponible</h4>
+            <p class="text-muted">Aucune équipe n'a encore été créée pour ce tournoi.</p>
+            {% if user.is_authenticated and user.type == "responsable" %}
+                <a href="#" class="btn btn-primary mt-2">
+                    <i class="fas fa-plus-circle me-1"></i>Créer une équipe
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fonction de recherche d'équipe
+    const searchInput = document.getElementById('teamSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', filterTeams);
+    }
+    
+    // Filtres par badge
+    const filterBadges = document.querySelectorAll('.filter-badge');
+    filterBadges.forEach(badge => {
+        badge.addEventListener('click', function() {
+            // Reset active state
+            filterBadges.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            filterTeams();
+        });
+    });
+    
+    // Fonction de filtrage combiné (recherche + filtres)
+    function filterTeams() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const activeFilter = document.querySelector('.filter-badge.active').dataset.filter;
+        const teamCards = document.querySelectorAll('#equipesContainer .col');
+        
+        teamCards.forEach(card => {
+            const teamName = card.dataset.teamName;
+            const places = parseInt(card.dataset.places);
+            let showCard = teamName.includes(searchTerm);
+            
+            // Appliquer les filtres par type
+            if (activeFilter === 'places-disponibles') {
+                showCard = showCard && places < 20;
+            } else if (activeFilter === 'equipes-completes') {
+                showCard = showCard && places >= 20;
+            }
+            
+            card.style.display = showCard ? '' : 'none';
+        });
+        
+        // Vérifier s'il y a des résultats
+        const visibleCards = document.querySelectorAll('#equipesContainer .col[style="display: \'\'"]');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        
+        if (visibleCards.length === 0 && !noResultsMessage) {
+            const container = document.getElementById('equipesContainer');
+            const message = document.createElement('div');
+            message.id = 'noResultsMessage';
+            message.className = 'col-12 text-center py-5';
+            message.innerHTML = `
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>Aucun résultat</h4>
+                <p class="text-muted">Aucune équipe ne correspond à votre recherche</p>
+            `;
+            container.appendChild(message);
+        } else if (visibleCards.length > 0 && noResultsMessage) {
+            noResultsMessage.remove();
+        }
+    }
+    
+    // Animation au défilement pour les cartes
+    const cards = document.querySelectorAll('.animate-card');
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+    } else {
+        // Fallback pour navigateurs sans IntersectionObserver
+        cards.forEach(card => {
+            card.classList.add('visible');
+        });
+    }
+});
+</script>
+{% endblock %}

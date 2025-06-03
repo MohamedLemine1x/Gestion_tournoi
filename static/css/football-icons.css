@@ -1,0 +1,63 @@
+/* 
+ * Football Icons CSS
+ * Styles pour les icônes de football dans l'application
+ */
+
+.football-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-image: url('../img/football-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    vertical-align: middle;
+}
+
+/* Variantes de taille */
+.football-icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.football-icon-lg {
+    width: 32px;
+    height: 32px;
+}
+
+.football-icon-xl {
+    width: 48px;
+    height: 48px;
+}
+
+/* Icônes avec couleurs personnalisées */
+.football-icon-primary {
+    filter: invert(44%) sepia(94%) saturate(1752%) hue-rotate(190deg) brightness(97%) contrast(101%);
+}
+
+.football-icon-success {
+    filter: invert(63%) sepia(98%) saturate(352%) hue-rotate(93deg) brightness(91%) contrast(87%);
+}
+
+.football-icon-danger {
+    filter: invert(28%) sepia(94%) saturate(7471%) hue-rotate(356deg) brightness(97%) contrast(115%);
+}
+
+/* Animation de rotation */
+.football-icon-spin {
+    animation: football-spin 2s linear infinite;
+}
+
+@keyframes football-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Utilisations avec des boutons */
+.btn .football-icon {
+    margin-right: 8px;
+} 
